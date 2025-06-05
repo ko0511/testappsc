@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets 資料測試 - 進階修正版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0f7ff;
+            font-family: 'Microsoft JhengHei', sans-serif;
+        }
+        .form-container {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="form-container bg-white rounded-lg p-8 w-full max-w-2xl">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-blue-600">Google Sheets 資料測試 - 進階修正版</h1>
+                <p class="text-gray-600 mt-2">請填寫以下資料，測試與 Google Sheets 的連接</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <form id="dataForm" class="space-y-6">
+                        <div>
+                            <label for="scriptUrl" class="block text-sm font-medium text-gray-700 mb-1">Google Apps Script 網址</label>
+                            <input type="url" id="scriptUrl" name="scriptUrl" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="https://script.google.com/macros/s/...">
+                            <p class="text-xs text-gray-500 mt-1">請輸入您部署的 Google Apps Script 網頁應用程式 URL</p>
+                        </div>
+                        
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                            <input type="text" id="name" name="name" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="contact" class="block text-sm font-medium text-gray-700 mb-1">聯絡方式</label>
+                            <input type="text" id="contact" name="contact" required 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="submit" 
+                                class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                提交資料
+                            </button>
+                            <button type="button" id="testConnectionBtn"
+                                class="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                測試連接
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="status" class="mt-6 text-center hidden">
+                        <div id="loading" class="text-blue-600 font-medium">
+                            <svg class="animate-spin h-5 w-5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            處理中...
+                        </div>
+                        <div id="success" class="text-green-600 font-medium hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            資料已成功提交！
+                        </div>
+                        <div id="error" class="text-red-600 font-medium hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span id="errorMessage">提交失敗，請稍後再試。</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="mb-4">
+                        <h2 class="text-lg font-semibold text-gray-700 mb-2">偵錯資訊</h2>
+                        <div class="bg-gray-100 p-4 rounded-md h-48 overflow-y-auto">
+                            <pre id="debugInfo" class="text-xs">尚未執行任何操作</pre>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-700 mb-2">回應資料</h2>
+                        <div class="bg-gray-100 p-4 rounded-md h-48 overflow-y-auto">
+                            <pre id="responseData" class="text-xs">尚未收到回應</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 border-t pt-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">進階修正版 Google Apps Script 程式碼</h2>
+                <div class="bg-gray-100 p-4 rounded-md">
+                    <pre class="text-xs overflow-x-auto"><code>/**
+ * 處理 POST 請求 - 進階修正版
+ * 解決 "收到請求: undefined" 問題
+ */
+function doPost(e) {
+  // 創建回應輸出
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  try {
+    // 安全地記錄請求
+    Logger.log("收到請求開始處理");
+    
+    // 直接使用參數方式獲取資料，避免 JSON 解析問題
+    let name = "";
+    let contact = "";
+    
+    // 檢查請求對象
+    if (e === undefined || e === null) {
+      Logger.log("請求對象為 undefined 或 null");
+      return output.setContent(JSON.stringify({
+        result: "error",
+        error: "請求對象為空"
+      }));
+    }
+    
+    // 嘗試從不同來源獲取資料
+    if (e.parameter && e.parameter.name && e.parameter.contact) {
+      // 從 URL 參數獲取
+      name = e.parameter.name;
+      contact = e.parameter.contact;
+      Logger.log("從 URL 參數獲取資料");
+    } else if (e.postData) {
+      Logger.log("檢測到 postData: " + (e.postData.type || "無類型"));
+      
+      // 從 postData 獲取
+      if (e.postData.contents) {
+        try {
+          // 嘗試解析為 JSON
+          const jsonData = JSON.parse(e.postData.contents);
+          if (jsonData.name && jsonData.contact) {
+            name = jsonData.name;
+            contact = jsonData.contact;
+            Logger.log("從 JSON 獲取資料");
+          }
+        } catch (parseError) {
+          Logger.log("JSON 解析失敗: " + parseError.toString());
+          
+          // 嘗試解析為表單數據
+          const formData = e.postData.contents;
+          if (formData.indexOf('name=') !== -1 && formData.indexOf('contact=') !== -1) {
+            // 簡單解析表單數據
+            const params = formData.split('&');
+            for (let i = 0; i < params.length; i++) {
+              const param = params[i].split('=');
+              if (param[0] === 'name') {
+                name = decodeURIComponent(param[1].replace(/\+/g, ' '));
+              } else if (param[0] === 'contact') {
+                contact = decodeURIComponent(param[1].replace(/\+/g, ' '));
+              }
+            }
+            Logger.log("從表單數據獲取資料");
+          }
+        }
+      }
+    } else {
+      Logger.log("無法從請求中獲取資料");
+      return output.setContent(JSON.stringify({
+        result: "error",
+        error: "無法從請求中獲取資料",
+        requestInfo: "請求對象存在但無法獲取資料"
+      }));
+    }
+    
+    // 檢查是否成功獲取資料
+    if (!name || !contact) {
+      Logger.log("缺少必要欄位");
+      return output.setContent(JSON.stringify({
+        result: "error",
+        error: "缺少必要欄位 (姓名或聯絡方式)",
+        name: name || "未提供",
+        contact: contact || "未提供"
+      }));
+    }
+    
+    // 開啟 Google Sheet
+    try {
+      const ss = SpreadsheetApp.openById("1GYbiKgVDhKl_yXJC4cpq38SnvBPE08ll1kP7Uav5HWw");
+      const sheet = ss.getSheetByName("sheet1");
+      
+      // 如果是第一次使用，創建標題行
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(["姓名", "聯絡方式", "提交時間"]);
+      }
+      
+      // 添加新資料行
+      const timestamp = new Date().toLocaleString("zh-TW");
+      sheet.appendRow([name, contact, timestamp]);
+      
+      Logger.log("資料已成功寫入 Google Sheet");
+      
+      // 返回成功訊息
+      return output.setContent(JSON.stringify({
+        result: "success",
+        message: "資料已成功寫入 Google Sheet",
+        processedData: {
+          name: name,
+          contact: contact,
+          timestamp: timestamp
+        }
+      }));
+    } catch (sheetError) {
+      Logger.log("Google Sheet 操作錯誤: " + sheetError.toString());
+      return output.setContent(JSON.stringify({
+        result: "error",
+        error: "Google Sheet 操作錯誤: " + sheetError.toString()
+      }));
+    }
+  } catch (generalError) {
+    Logger.log("一般錯誤: " + generalError.toString());
+    return output.setContent(JSON.stringify({
+      result: "error",
+      error: "一般錯誤: " + generalError.toString()
+    }));
+  }
+}
+
+/**
+ * 處理 GET 請求 (用於測試連接)
+ */
+function doGet() {
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  Logger.log("收到 GET 請求");
+  
+  return output.setContent(JSON.stringify({
+    result: "success",
+    message: "Google Apps Script 連接成功",
+    timestamp: new Date().toLocaleString("zh-TW")
+  }));
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="mt-8 border-t pt-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">使用說明</h2>
+                <div class="space-y-2 text-sm text-gray-700">
+                    <p>1. 複製上方進階修正版的 Google Apps Script 程式碼到您的 Apps Script 專案中</p>
+                    <p>2. 部署為網頁應用程式，設定執行身分為「您自己」，存取權限為「任何人」</p>
+                    <p>3. 複製部署後的 URL 到本頁的「Google Apps Script 網址」欄位</p>
+                    <p>4. 點擊「測試連接」確認連接正常</p>
+                    <p>5. 填寫姓名和聯絡方式，點擊「提交資料」測試資料寫入功能</p>
+                    <p class="text-red-600 font-medium">注意：此進階修正版解決了「收到請求: undefined」的問題，並增強了錯誤處理</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 border-t pt-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">常見問題排解</h2>
+                <div class="space-y-4 text-sm text-gray-700">
+                    <div>
+                        <h3 class="font-medium">問題：收到請求: undefined</h3>
+                        <p>解決方案：此版本已修正此問題，使用更安全的方式處理請求對象</p>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">問題：CORS 錯誤</h3>
+                        <p>解決方案：確保 Apps Script 部署時選擇「任何人」可以存取，並在部署後點擊「授權存取」</p>
+                    </div>
+                    <div>
+                        <h3 class="font-medium">問題：資料未寫入 Google Sheet</h3>
+                        <p>解決方案：檢查 Google Sheet ID 是否正確，並確保您有該 Sheet 的編輯權限</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 保存和恢復 Script URL
+        if (localStorage.getItem('lastScriptUrl')) {
+            document.getElementById('scriptUrl').value = localStorage.getItem('lastScriptUrl');
+        }
+        
+        document.getElementById('scriptUrl').addEventListener('change', function() {
+            localStorage.setItem('lastScriptUrl', this.value);
+        });
+        
+        // 添加偵錯資訊
+        function addDebugInfo(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.textContent = `[${timestamp}] ${message}\n` + debugInfo.textContent;
+        }
+        
+        // 顯示回應資料
+        function showResponseData(data) {
+            document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // 測試連接按鈕
+        document.getElementById('testConnectionBtn').addEventListener('click', function() {
+            const scriptURL = document.getElementById('scriptUrl').value;
+            
+            if (!scriptURL) {
+                addDebugInfo('錯誤: 請輸入 Google Apps Script 網址');
+                return;
+            }
+            
+            addDebugInfo(`測試連接到: ${scriptURL}`);
+            
+            // 顯示處理中狀態
+            document.getElementById('status').classList.remove('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('success').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+            
+            // 發送 GET 請求測試連接
+            fetch(scriptURL)
+                .then(response => {
+                    addDebugInfo(`收到回應狀態: ${response.status}`);
+                    return response.text();
+                })
+                .then(text => {
+                    document.getElementById('loading').classList.add('hidden');
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        showResponseData(data);
+                        
+                        if (data.result === 'success') {
+                            document.getElementById('success').classList.remove('hidden');
+                            addDebugInfo('連接測試成功');
+                        } else {
+                            document.getElementById('error').classList.remove('hidden');
+                            document.getElementById('errorMessage').textContent = data.error || '連接測試失敗';
+                            addDebugInfo(`連接測試失敗: ${data.error || '未知錯誤'}`);
+                        }
+                    } catch (e) {
+                        document.getElementById('error').classList.remove('hidden');
+                        document.getElementById('errorMessage').textContent = '回應不是有效的 JSON 格式';
+                        addDebugInfo(`解析回應失敗: ${e.message}`);
+                        showResponseData({error: '回應不是有效的 JSON', rawResponse: text});
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('errorMessage').textContent = `連接失敗: ${error.message}`;
+                    addDebugInfo(`連接錯誤: ${error.message}`);
+                    showResponseData({error: error.message});
+                });
+        });
+        
+        // 提交表單 - 使用多種方式嘗試提交
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const scriptURL = document.getElementById('scriptUrl').value;
+            const name = document.getElementById('name').value;
+            const contact = document.getElementById('contact').value;
+            
+            if (!scriptURL) {
+                addDebugInfo('錯誤: 請輸入 Google Apps Script 網址');
+                return;
+            }
+            
+            // 顯示處理中狀態
+            document.getElementById('status').classList.remove('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('success').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+            
+            // 準備要發送的資料 - 使用 URL 參數方式
+            const url = new URL(scriptURL);
+            url.searchParams.append('name', name);
+            url.searchParams.append('contact', contact);
+            
+            addDebugInfo(`準備發送資料: name=${name}, contact=${contact}`);
+            addDebugInfo(`使用 URL 參數方式提交`);
+            
+            // 發送資料到 Google Apps Script - 使用 GET 方式帶參數
+            fetch(url)
+                .then(response => {
+                    addDebugInfo(`收到回應狀態: ${response.status}`);
+                    return response.text();
+                })
+                .then(text => {
+                    document.getElementById('loading').classList.add('hidden');
+                    
+                    try {
+                        const responseData = JSON.parse(text);
+                        showResponseData(responseData);
+                        
+                        if (responseData.result === 'success') {
+                            document.getElementById('success').classList.remove('hidden');
+                            document.getElementById('name').value = '';
+                            document.getElementById('contact').value = '';
+                            addDebugInfo('資料提交成功');
+                        } else {
+                            document.getElementById('error').classList.remove('hidden');
+                            document.getElementById('errorMessage').textContent = responseData.error || '提交失敗，請稍後再試';
+                            addDebugInfo(`提交失敗: ${responseData.error || '未知錯誤'}`);
+                        }
+                    } catch (e) {
+                        document.getElementById('error').classList.remove('hidden');
+                        document.getElementById('errorMessage').textContent = '回應不是有效的 JSON 格式';
+                        addDebugInfo(`解析回應失敗: ${e.message}`);
+                        showResponseData({error: '回應不是有效的 JSON', rawResponse: text});
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error').classList.remove('hidden');
+                    document.getElementById('errorMessage').textContent = `連接失敗: ${error.message}`;
+                    addDebugInfo(`連接錯誤: ${error.message}`);
+                    showResponseData({error: error.message});
+                });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94ac8046605d4a69',t:'MTc0OTA5MzI4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
