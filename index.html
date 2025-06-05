@@ -1,160 +1,38 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Sheets 資料測試 - 修正版</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>預約表單</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    form { max-width: 300px; margin: auto; }
+    input, button { width: 100%; padding: 10px; margin: 6px 0; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
 </head>
-<body class="bg-blue-50 font-sans">
-  <div class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-xl">
-      <h1 class="text-2xl font-bold text-blue-600 mb-4 text-center">寫入 Google Sheets 表單</h1>
-
-      <form id="dataForm" class="space-y-4">
-        <div>
-          <label for="scriptUrl" class="block text-sm font-medium text-gray-700">Google Apps Script 網址</label>
-          <input type="url" id="scriptUrl" required
-            class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-            placeholder="https://script.google.com/macros/s/.../exec">
-        </div>
-
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700">姓名</label>
-          <input type="text" id="name" required
-            class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <div>
-          <label for="contact" class="block text-sm font-medium text-gray-700">聯絡方式</label>
-          <input type="text" id="contact" required
-            class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-        </div>
-
-        <div class="flex space-x-4">
-          <button type="submit"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-medium">
-            提交資料
-          </button>
-          <button type="button" id="testConnectionBtn"
-            class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-medium">
-            測試連接
-          </button>
-        </div>
-      </form>
-
-      <div id="status" class="mt-6 hidden text-center">
-        <div id="loading" class="text-blue-500 font-medium hidden">處理中...</div>
-        <div id="success" class="text-green-600 font-medium hidden">✅ 資料提交成功！</div>
-        <div id="error" class="text-red-600 font-medium hidden">
-          ❌ 提交失敗：<span id="errorMessage">請稍後再試</span>
-        </div>
-      </div>
-
-      <div class="mt-6">
-        <h2 class="text-sm font-semibold text-gray-700 mb-1">偵錯資訊</h2>
-        <pre id="debugInfo" class="bg-gray-100 p-3 rounded text-xs h-32 overflow-y-auto">尚未執行任何操作</pre>
-      </div>
-      <div class="mt-4">
-        <h2 class="text-sm font-semibold text-gray-700 mb-1">回應資料</h2>
-        <pre id="responseData" class="bg-gray-100 p-3 rounded text-xs h-32 overflow-y-auto">尚未收到回應</pre>
-      </div>
-    </div>
-  </div>
-
+<body>
+  <h2>預約登記</h2>
+  <form id="reserveForm">
+    <input type="text" name="name" placeholder="姓名" required>
+    <input type="text" name="contact" placeholder="聯絡方式" required>
+    <button type="submit">送出</button>
+  </form>
+  <div id="msg"></div>
   <script>
-    if (localStorage.getItem('lastScriptUrl')) {
-      document.getElementById('scriptUrl').value = localStorage.getItem('lastScriptUrl');
-    }
-
-    document.getElementById('scriptUrl').addEventListener('change', function () {
-      localStorage.setItem('lastScriptUrl', this.value);
-    });
-
-    function addDebugInfo(message) {
-      const debugInfo = document.getElementById('debugInfo');
-      const timestamp = new Date().toLocaleTimeString();
-      debugInfo.textContent = `[${timestamp}] ${message}\n` + debugInfo.textContent;
-    }
-
-    function showResponseData(data) {
-      document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
-    }
-
-    document.getElementById('testConnectionBtn').addEventListener('click', function () {
-      const url = document.getElementById('scriptUrl').value;
-      if (!url) return;
-
-      document.getElementById('status').classList.remove('hidden');
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('success').classList.add('hidden');
-      document.getElementById('error').classList.add('hidden');
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('loading').classList.add('hidden');
-          showResponseData(data);
-          if (data.result === 'success') {
-            document.getElementById('success').classList.remove('hidden');
-            addDebugInfo("連接成功");
-          } else {
-            document.getElementById('error').classList.remove('hidden');
-            document.getElementById('errorMessage').textContent = data.error || '未知錯誤';
-            addDebugInfo("連接失敗: " + data.error);
-          }
-        })
-        .catch(err => {
-          document.getElementById('loading').classList.add('hidden');
-          document.getElementById('error').classList.remove('hidden');
-          document.getElementById('errorMessage').textContent = err.message;
-          addDebugInfo("Fetch 錯誤: " + err.message);
-          showResponseData({ error: err.message });
-        });
-    });
-
-    document.getElementById('dataForm').addEventListener('submit', function (e) {
+    const scriptURL = '這裡貼上你的Apps Script網址';
+    const form = document.getElementById('reserveForm');
+    const msg = document.getElementById('msg');
+    form.addEventListener('submit', e => {
       e.preventDefault();
-
-      const scriptURL = document.getElementById('scriptUrl').value;
-      const name = document.getElementById('name').value;
-      const contact = document.getElementById('contact').value;
-
-      if (!scriptURL) return;
-
-      document.getElementById('status').classList.remove('hidden');
-      document.getElementById('loading').classList.remove('hidden');
-      document.getElementById('success').classList.add('hidden');
-      document.getElementById('error').classList.add('hidden');
-
-      addDebugInfo(`提交資料中: name=${name}, contact=${contact}`);
-
-      fetch(scriptURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, contact })
-      })
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('loading').classList.add('hidden');
-          showResponseData(data);
-          if (data.result === 'success') {
-            document.getElementById('success').classList.remove('hidden');
-            document.getElementById('name').value = '';
-            document.getElementById('contact').value = '';
-            addDebugInfo("✅ 提交成功");
-          } else {
-            document.getElementById('error').classList.remove('hidden');
-            document.getElementById('errorMessage').textContent = data.error || '提交失敗';
-            addDebugInfo("提交失敗: " + data.error);
-          }
+      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => response.text())
+        .then(result => {
+          msg.innerHTML = '<span class="success">送出成功！</span>';
+          form.reset();
         })
-        .catch(err => {
-          document.getElementById('loading').classList.add('hidden');
-          document.getElementById('error').classList.remove('hidden');
-          document.getElementById('errorMessage').textContent = err.message;
-          addDebugInfo("Fetch 錯誤: " + err.message);
-          showResponseData({ error: err.message });
+        .catch(error => {
+          msg.innerHTML = '<span class="error">送出失敗，請稍後再試。</span>';
         });
     });
   </script>
