@@ -1,40 +1,748 @@
+
+
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>預約表單</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    form { max-width: 300px; margin: auto; }
-    input, button { width: 100%; padding: 10px; margin: 6px 0; }
-    .success { color: green; }
-    .error { color: red; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程預約系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#F9E6E8',
+                            DEFAULT: '#E4A9AF',
+                            dark: '#C97F85'
+                        },
+                        secondary: {
+                            light: '#E6F0F9',
+                            DEFAULT: '#A9C7E4',
+                            dark: '#7F9FC9'
+                        },
+                        accent: {
+                            light: '#FFF3E0',
+                            DEFAULT: '#FFD8A8',
+                            dark: '#FFC166'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #E4A9AF;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .course-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .course-card:hover:not(.disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .error {
+            color: #D8000C;
+            background-color: #FFBABA;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        
+        /* 動態效果 */
+        .animated-bg {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .animated-bg-1 {
+            top: -30px;
+            left: -30px;
+            background-color: #E4A9AF;
+            animation-delay: 0s;
+        }
+        
+        .animated-bg-2 {
+            bottom: -20px;
+            right: -20px;
+            background-color: #A9C7E4;
+            animation-delay: 2s;
+        }
+        
+        .animated-bg-3 {
+            top: 50%;
+            right: -40px;
+            background-color: #FFD8A8;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.1);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(228, 169, 175, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(228, 169, 175, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(228, 169, 175, 0);
+            }
+        }
+        
+        .submit-btn {
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .submit-btn.active {
+            opacity: 1;
+        }
+        
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        .color-bar {
+            height: 4px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(90deg, #E4A9AF, #A9C7E4, #FFD8A8);
+            background-size: 200% 100%;
+            animation: gradientMove 3s ease infinite;
+        }
+        
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
-  <h2>預約登記</h2>
-  <form id="reserveForm">
-    <input type="text" name="name" placeholder="姓名" required>
-    <input type="text" name="contact" placeholder="聯絡方式" required>
-    <button type="submit">送出</button>
-  </form>
-  <div id="msg"></div>
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwIP3e16UFO1SKyWg4zAajnMelKFOr1a3BK_XzcMPY0Aj-LMrFeEcS0Bc6GSYXpe8qxQw/exec';
-    const form = document.getElementById('reserveForm');
-    const msg = document.getElementById('msg');
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-        .then(response => response.text())
-        .then(result => {
-          msg.innerHTML = '<span class="success">送出成功！</span>';
-          form.reset();
-        })
-        .catch(error => {
-          msg.innerHTML = '<span class="error">送出失敗，請稍後再試。</span>';
+    <!-- 載入中動畫 -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 頂部導航 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E4A9AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-800">課程預約系統</h1>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 課程列表 -->
+        <div id="coursesSection" class="mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 relative overflow-hidden">
+                <!-- 動態背景元素 -->
+                <div class="animated-bg animated-bg-1"></div>
+                <div class="animated-bg animated-bg-2"></div>
+                <div class="animated-bg animated-bg-3"></div>
+                <div class="color-bar"></div>
+                
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 relative z-10">可預約課程</h2>
+                <div id="coursesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                    <div class="col-span-full text-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        <p class="text-gray-500">正在載入課程資料...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 預約表單 -->
+        <div id="bookingForm" class="bg-white rounded-lg shadow-md p-6 mb-8 hidden relative overflow-hidden">
+            <!-- 動態背景元素 -->
+            <div class="animated-bg animated-bg-1"></div>
+            <div class="animated-bg animated-bg-2"></div>
+            <div class="color-bar"></div>
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 relative z-10">預約表單</h2>
+            <form id="reservationForm" class="relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="courseName">課程名稱</label>
+                        <input type="text" id="courseName" name="courseName" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                        <input type="hidden" id="courseId" name="courseId">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="teacher">教師姓名</label>
+                        <input type="text" id="teacher" name="teacher" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="classroom">教室</label>
+                        <input type="text" id="classroom" name="classroom" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="dateSelect">預約日期</label>
+                        <select id="dateSelect" name="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">請選擇日期</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="timeSelect">課程時間</label>
+                        <select id="timeSelect" name="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">請選擇時間</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="name">姓名</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="contact">聯絡方式</label>
+                        <input type="text" id="contact" name="contact" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                </div>
+                <div id="bookingMsg" class="my-4"></div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="cancelBookingBtn" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">取消</button>
+                    <button type="submit" id="submitBtn" class="submit-btn px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">提交預約</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 調試信息 -->
+        <div id="debugInfo" class="debug-info hidden"></div>
+    </div>
+
+    <script>
+        // 全局變數
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwIP3e16UFO1SKyWg4zAajnMelKFOr1a3BK_XzcMPY0Aj-LMrFeEcS0Bc6GSYXpe8qxQw/exec';
+        const sheetId = '10X8yQ1657B4hdYCDJaCxjjiBUXv5aOAToJV64MaIXOc';
+        let courses = [];
+        let currentCourse = null;
+        let courseSchedules = {}; // 存儲相同課程名稱和教師的不同日期和時間
+        let debugMode = false; // 調試模式
+
+        // 顯示載入中
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        // 隱藏載入中
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 調試日誌
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(message, data);
+                const debugInfo = document.getElementById('debugInfo');
+                debugInfo.classList.remove('hidden');
+                debugInfo.textContent = message + (data ? ': ' + JSON.stringify(data).substring(0, 100) + '...' : '');
+            }
+        }
+
+        // 使用 OpenSheet 格式讀取課程數據
+        function fetchCourses() {
+            showLoading();
+            debugLog('開始讀取課程數據');
+            
+            // 使用 OpenSheet API 讀取試算表
+            const openSheetUrl = `https://opensheet.elk.sh/${sheetId}/課程`;
+            
+            fetch(openSheetUrl)
+                .then(response => {
+                    debugLog('收到 OpenSheet 回應', response);
+                    if (!response.ok) {
+                        throw new Error('OpenSheet API 回應錯誤: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    debugLog('解析 OpenSheet 數據', data);
+                    if (data && data.length > 0) {
+                        // 解析數據 - 使用正確的欄位名稱
+                        const parsedCourses = data.map((row, index) => ({
+                            id: index + 1, // 使用索引作為ID
+                            name: row['課程名稱'] || '',
+                            teacher: row['教師姓名'] || '',
+                            classroom: row['教室'] || '',
+                            date: row['日期'] || '',
+                            time: row['時間'] || '',
+                            capacity: row['容量'] ? parseInt(row['容量']) : 0,
+                            booked: row['已預約人數'] ? parseInt(row['已預約人數']) : 0
+                        }));
+                        
+                        debugLog('解析後的課程數據', parsedCourses);
+                        courses = parsedCourses.filter(course => course.name); // 過濾掉無效數據
+                        
+                        // 組織相同課程名稱和教師的課程
+                        organizeCoursesSchedule();
+                        
+                        renderCourses();
+                    } else {
+                        console.error('無法解析試算表數據或數據為空');
+                        document.getElementById('coursesList').innerHTML = `
+                            <div class="col-span-full text-center py-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                </svg>
+                                <p class="text-gray-500">目前沒有可預約的課程</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取課程數據失敗:', error);
+                    debugLog('獲取課程數據失敗', error);
+                    document.getElementById('coursesList').innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-gray-500">載入課程資料失敗，請稍後再試</p>
+                            <p class="text-sm text-gray-400 mt-2">錯誤訊息: ${error.message}</p>
+                        </div>
+                    `;
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+        
+        // 組織相同課程名稱和教師的課程
+        function organizeCoursesSchedule() {
+            courseSchedules = {};
+            
+            courses.forEach(course => {
+                const key = `${course.name}-${course.teacher}`;
+                
+                if (!courseSchedules[key]) {
+                    courseSchedules[key] = {
+                        id: course.id,
+                        name: course.name,
+                        teacher: course.teacher,
+                        classroom: course.classroom,
+                        dates: {},
+                        capacity: 0,
+                        booked: 0
+                    };
+                }
+                
+                if (!courseSchedules[key].dates[course.date]) {
+                    courseSchedules[key].dates[course.date] = [];
+                }
+                
+                courseSchedules[key].dates[course.date].push({
+                    time: course.time,
+                    id: course.id,
+                    capacity: course.capacity,
+                    booked: course.booked
+                });
+                
+                // 累計總容量和已預約人數
+                courseSchedules[key].capacity += course.capacity;
+                courseSchedules[key].booked += course.booked;
+            });
+            
+            debugLog('組織後的課程數據', courseSchedules);
+        }
+
+        // 渲染課程列表
+        function renderCourses() {
+            const container = document.getElementById('coursesList');
+            container.innerHTML = '';
+            
+            if (Object.keys(courseSchedules).length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        </svg>
+                        <p class="text-gray-500">目前沒有可預約的課程</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 使用組織好的課程數據
+            Object.values(courseSchedules).forEach(course => {
+                const isDisabled = course.booked >= course.capacity;
+                const card = document.createElement('div');
+                card.className = `course-card bg-white border border-gray-200 rounded-lg overflow-hidden ${isDisabled ? 'disabled' : 'shimmer'}`;
+                
+                const statusColor = isDisabled ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600';
+                const randomColor = ['bg-primary-light', 'bg-secondary-light', 'bg-accent-light'][Math.floor(Math.random() * 3)];
+                
+                // 計算課程場次數量
+                let totalSessions = 0;
+                Object.keys(course.dates).forEach(date => {
+                    totalSessions += course.dates[date].length;
+                });
+                
+                card.innerHTML = `
+                    <div class="p-6 relative">
+                        <div class="absolute top-0 left-0 w-full h-1 ${randomColor}"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">${course.name}</h3>
+                            <span class="${statusColor} text-xs font-medium px-2.5 py-1 rounded-full">
+                                ${isDisabled ? '已額滿' : '可預約'}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-gray-600 text-sm">教師姓名：${course.teacher}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-gray-600 text-sm">教室：${course.classroom}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-gray-600 text-sm">課程場次：${totalSessions}場</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-600 text-sm">可預約人數</span>
+                            <span class="font-medium">${course.capacity}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-600 text-sm">已預約</span>
+                            <span class="font-medium">${course.booked}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: ${(course.booked / course.capacity) * 100}%"></div>
+                        </div>
+                        <button class="book-btn w-full py-2.5 rounded-lg ${isDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-primary text-white hover:bg-primary-dark pulse'} transition font-medium" 
+                            ${isDisabled ? 'disabled' : ''} data-course-key="${course.name}-${course.teacher}">
+                            ${isDisabled ? '已額滿' : '立即預約'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+                
+                if (!isDisabled) {
+                    const bookBtn = card.querySelector('.book-btn');
+                    bookBtn.addEventListener('click', () => {
+                        showBookingForm(course);
+                    });
+                }
+            });
+        }
+
+        // 顯示預約表單
+        function showBookingForm(course) {
+            currentCourse = course;
+            
+            document.getElementById('coursesSection').classList.add('hidden');
+            document.getElementById('bookingForm').classList.remove('hidden');
+            
+            document.getElementById('courseName').value = course.name;
+            document.getElementById('teacher').value = course.teacher;
+            document.getElementById('classroom').value = course.classroom;
+            
+            // 填充日期下拉選單
+            const dateSelect = document.getElementById('dateSelect');
+            dateSelect.innerHTML = '<option value="">請選擇日期</option>';
+            
+            Object.keys(course.dates).sort().forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateSelect.appendChild(option);
+            });
+            
+            // 清空時間下拉選單
+            const timeSelect = document.getElementById('timeSelect');
+            timeSelect.innerHTML = '<option value="">請選擇時間</option>';
+            timeSelect.disabled = true;
+            
+            // 移除之前的事件監聽器
+            const newDateSelect = dateSelect.cloneNode(true);
+            dateSelect.parentNode.replaceChild(newDateSelect, dateSelect);
+            
+            const newTimeSelect = timeSelect.cloneNode(true);
+            timeSelect.parentNode.replaceChild(newTimeSelect, timeSelect);
+            
+            // 重新獲取元素
+            const updatedDateSelect = document.getElementById('dateSelect');
+            const updatedTimeSelect = document.getElementById('timeSelect');
+            
+            // 監聽日期選擇變化
+            updatedDateSelect.addEventListener('change', function() {
+                const selectedDate = this.value;
+                updatedTimeSelect.innerHTML = '<option value="">請選擇時間</option>';
+                
+                if (selectedDate) {
+                    updatedTimeSelect.disabled = false;
+                    
+                    // 填充對應日期的時間選項
+                    course.dates[selectedDate].forEach(session => {
+                        const isAvailable = session.booked < session.capacity;
+                        
+                        const option = document.createElement('option');
+                        option.value = session.time;
+                        option.textContent = `${session.time} (${session.booked}/${session.capacity})`;
+                        option.dataset.id = session.id;
+                        
+                        if (!isAvailable) {
+                            option.disabled = true;
+                            option.textContent += ' - 已額滿';
+                        }
+                        
+                        updatedTimeSelect.appendChild(option);
+                    });
+                } else {
+                    updatedTimeSelect.disabled = true;
+                }
+                
+                checkFormCompletion();
+            });
+            
+            // 監聽時間選擇變化
+            updatedTimeSelect.addEventListener('change', function() {
+                const selectedDate = updatedDateSelect.value;
+                const selectedTime = this.value;
+                
+                if (selectedDate && selectedTime) {
+                    // 找到對應的課程ID
+                    const selectedSession = course.dates[selectedDate].find(s => s.time === selectedTime);
+                    if (selectedSession) {
+                        document.getElementById('courseId').value = selectedSession.id;
+                    }
+                }
+                
+                checkFormCompletion();
+            });
+            
+            // 清空其他表單字段
+            document.getElementById('name').value = '';
+            document.getElementById('contact').value = '';
+            
+            // 清空消息
+            document.getElementById('bookingMsg').innerHTML = '';
+            
+            // 重置提交按鈕狀態
+            document.getElementById('submitBtn').classList.remove('active');
+        }
+        
+        // 檢查表單是否已填寫完整
+        function checkFormCompletion() {
+            const dateField = document.getElementById('dateSelect');
+            const timeField = document.getElementById('timeSelect');
+            const nameField = document.getElementById('name');
+            const contactField = document.getElementById('contact');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (dateField.value && timeField.value && nameField.value && contactField.value) {
+                submitBtn.classList.add('active');
+            } else {
+                submitBtn.classList.remove('active');
+            }
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否啟用調試模式
+            const urlParams = new URLSearchParams(window.location.search);
+            debugMode = urlParams.has('debug');
+            
+            if (debugMode) {
+                document.getElementById('debugInfo').classList.remove('hidden');
+            }
+            
+            // 載入課程數據
+            fetchCourses();
+            
+            // 取消預約表單
+            document.getElementById('cancelBookingBtn').addEventListener('click', function() {
+                document.getElementById('bookingForm').classList.add('hidden');
+                document.getElementById('coursesSection').classList.remove('hidden');
+            });
+            
+            // 監聽表單輸入變化
+            const formInputs = document.querySelectorAll('#reservationForm input[required], #reservationForm select[required]');
+            formInputs.forEach(input => {
+                input.addEventListener('input', checkFormCompletion);
+            });
+            
+            // 預約表單提交
+            const reservationForm = document.getElementById('reservationForm');
+            reservationForm.addEventListener('submit', e => {
+                e.preventDefault();
+                
+                const dateSelect = document.getElementById('dateSelect');
+                const timeSelect = document.getElementById('timeSelect');
+                
+                if (!dateSelect.value || !timeSelect.value) {
+                    document.getElementById('bookingMsg').innerHTML = '<span class="error">請選擇日期和時間</span>';
+                    return;
+                }
+                
+                showLoading();
+                debugLog('提交預約表單');
+                
+                const formData = new FormData(reservationForm);
+                
+                fetch(scriptURL, { method: 'POST', body: formData })
+                    .then(response => {
+                        debugLog('收到表單提交回應', response);
+                        return response.text();
+                    })
+                    .then(result => {
+                        debugLog('表單提交成功', result);
+                        document.getElementById('bookingMsg').innerHTML = '<span class="success">預約成功！期待您的光臨！</span>';
+                        
+                        // 更新課程預約數量
+                        const courseId = document.getElementById('courseId').value;
+                        const selectedDate = dateSelect.value;
+                        const selectedTime = timeSelect.value;
+                        
+                        // 更新對應課程的預約數
+                        Object.values(courseSchedules).forEach(course => {
+                            if (course.dates[selectedDate]) {
+                                const session = course.dates[selectedDate].find(s => s.time === selectedTime && s.id === courseId);
+                                if (session) {
+                                    session.booked += 1;
+                                    course.booked += 1; // 更新總預約數
+                                }
+                            }
+                        });
+                        
+                        // 清空表單
+                        document.getElementById('name').value = '';
+                        document.getElementById('contact').value = '';
+                        dateSelect.value = '';
+                        timeSelect.innerHTML = '<option value="">請選擇時間</option>';
+                        timeSelect.disabled = true;
+                        
+                        // 重置提交按鈕狀態
+                        document.getElementById('submitBtn').classList.remove('active');
+                        
+                        // 延遲後返回課程列表
+                        setTimeout(() => {
+                            document.getElementById('bookingForm').classList.add('hidden');
+                            document.getElementById('coursesSection').classList.remove('hidden');
+                            renderCourses(); // 重新渲染課程列表
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        debugLog('表單提交失敗', error);
+                        document.getElementById('bookingMsg').innerHTML = '<span class="error">預約失敗，請稍後再試。</span>';
+                    })
+                    .finally(() => {
+                        hideLoading();
+                    });
+            });
         });
-    });
-  </script>
-</body>
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94adffc8a0574a21',t:'MTc0OTEwODk4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
