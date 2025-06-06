@@ -241,297 +241,12 @@
             max-height: 300px;
             overflow: auto;
         }
-        
-        .refresh-indicator {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(228, 169, 175, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .refresh-indicator.show {
-            opacity: 1;
-            animation: fadeInOut 2s ease forwards;
-        }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        
-        /* 新的全頁面提示訊息樣式 */
-        .verification-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(3px);
-        }
-        
-        .verification-container {
-            background-color: #FFF3E0;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 90%;
-            width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #FFD8A8;
-        }
-        
-        .verification-title {
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: #B45309;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        .verification-message {
-            font-size: 1rem;
-            color: #92400E;
-            margin-bottom: 20px;
-        }
-        
-        /* 可愛的動畫角色 */
-        .character-container {
-            position: relative;
-            height: 120px;
-            width: 100%;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-        
-        /* 可愛的雲朵 */
-        .cloud {
-            position: absolute;
-            background-color: white;
-            border-radius: 50%;
-            opacity: 0.9;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-        }
-        
-        .cloud-1 {
-            width: 60px;
-            height: 60px;
-            top: 10px;
-            left: 20px;
-        }
-        
-        .cloud-2 {
-            width: 80px;
-            height: 80px;
-            top: 5px;
-            left: 60px;
-        }
-        
-        .cloud-3 {
-            width: 70px;
-            height: 70px;
-            top: 15px;
-            left: 120px;
-        }
-        
-        /* 可愛的小動物動畫 */
-        .character {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            bottom: 10px;
-            left: -60px;
-            animation: character-move 4s linear infinite;
-        }
-        
-        @keyframes character-move {
-            0% {
-                left: -60px;
-                transform: translateY(0) rotate(0deg);
-            }
-            10% {
-                transform: translateY(-15px) rotate(5deg);
-            }
-            20% {
-                transform: translateY(0) rotate(0deg);
-            }
-            30% {
-                transform: translateY(-15px) rotate(-5deg);
-            }
-            40% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-10px) rotate(5deg);
-            }
-            60% {
-                transform: translateY(0) rotate(0deg);
-            }
-            70% {
-                transform: translateY(-10px) rotate(-5deg);
-            }
-            80% {
-                transform: translateY(0) rotate(0deg);
-            }
-            100% {
-                left: calc(100% + 60px);
-                transform: translateY(0) rotate(0deg);
-            }
-        }
-        
-        /* 星星閃爍動畫 */
-        .star {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            opacity: 0;
-            animation: star-twinkle 3s ease-in-out infinite;
-        }
-        
-        .star-1 {
-            top: 20px;
-            left: 30%;
-            animation-delay: 0.5s;
-        }
-        
-        .star-2 {
-            top: 50px;
-            left: 60%;
-            animation-delay: 1.5s;
-        }
-        
-        .star-3 {
-            top: 80px;
-            left: 20%;
-            animation-delay: 2.5s;
-        }
-        
-        @keyframes star-twinkle {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
-        }
-        
-        /* 彩虹進度條 */
-        .rainbow-progress {
-            height: 6px;
-            width: 100%;
-            background: linear-gradient(90deg, #FF9AA2, #FFB7B2, #FFDAC1, #E2F0CB, #B5EAD7, #C7CEEA);
-            background-size: 600% 600%;
-            animation: rainbow-move 3s linear infinite;
-            border-radius: 3px;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .rainbow-progress::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.4);
-            animation: rainbow-shine 2s linear infinite;
-        }
-        
-        @keyframes rainbow-move {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-        
-        @keyframes rainbow-shine {
-            0% { left: -100%; }
-            100% { left: 200%; }
-        }
     </style>
 </head>
 <body>
     <!-- 載入中動畫 -->
     <div id="loading" class="loading">
         <div class="spinner"></div>
-    </div>
-    
-    <!-- 重新整理提示 -->
-    <div id="refreshIndicator" class="refresh-indicator">
-        <div class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>正在更新課程資料...</span>
-        </div>
-    </div>
-    
-    <!-- 新的全頁面提示訊息 -->
-    <div id="verificationOverlay" class="verification-overlay hidden">
-        <div class="verification-container">
-            <div class="verification-title">正在處理您的預約</div>
-            <div class="verification-message">請稍候，系統正在處理您的預約資料...</div>
-            
-            <!-- 可愛的動畫場景 -->
-            <div class="character-container">
-                <!-- 雲朵背景 -->
-                <div class="cloud cloud-1"></div>
-                <div class="cloud cloud-2"></div>
-                <div class="cloud cloud-3"></div>
-                
-                <!-- 星星 -->
-                <svg class="star star-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                </svg>
-                <svg class="star star-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                </svg>
-                <svg class="star star-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                </svg>
-                
-                <!-- 可愛的小動物 -->
-                <svg class="character" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <circle cx="256" cy="256" r="200" fill="#FFE8CC"/>
-                    <circle cx="180" cy="180" r="40" fill="white"/>
-                    <circle cx="330" cy="180" r="40" fill="white"/>
-                    <circle cx="180" cy="180" r="20" fill="#333"/>
-                    <circle cx="330" cy="180" r="20" fill="#333"/>
-                    <ellipse cx="256" cy="280" rx="30" ry="20" fill="#FF9AA2"/>
-                    <path d="M150 120 L180 80 L210 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
-                    <path d="M300 120 L330 80 L360 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
-                </svg>
-            </div>
-            
-            <!-- 彩虹進度條 -->
-            <div class="rainbow-progress"></div>
-        </div>
     </div>
 
     <!-- 頂部導航 -->
@@ -636,9 +351,6 @@
         let currentCourse = null;
         let courseSchedules = {}; // 存儲相同課程名稱和教師的不同日期和時間
         let debugMode = false; // 調試模式
-        let lastRefreshTime = 0; // 上次刷新時間戳
-        const REFRESH_COOLDOWN = 5000; // 刷新冷卻時間 (毫秒)
-        const HOME_REFRESH_DELAY = 1500; // 返回首頁刷新延遲時間 (毫秒)
 
         // 顯示載入中
         function showLoading() {
@@ -648,29 +360,6 @@
         // 隱藏載入中
         function hideLoading() {
             document.getElementById('loading').style.display = 'none';
-        }
-        
-        // 顯示刷新指示器
-        function showRefreshIndicator() {
-            const indicator = document.getElementById('refreshIndicator');
-            indicator.classList.add('show');
-            
-            // 2秒後自動隱藏
-            setTimeout(() => {
-                indicator.classList.remove('show');
-            }, 2000);
-        }
-        
-        // 顯示確認預約訊息
-        function showVerificationMessage(message = "請稍候，系統正在處理您的預約資料...") {
-            const verificationMessage = document.querySelector('.verification-message');
-            verificationMessage.textContent = message;
-            document.getElementById('verificationOverlay').classList.remove('hidden');
-        }
-        
-        // 隱藏確認預約訊息
-        function hideVerificationMessage() {
-            document.getElementById('verificationOverlay').classList.add('hidden');
         }
         
         // 調試日誌
@@ -715,22 +404,8 @@
         }
 
         // 使用 OpenSheet 格式讀取課程數據
-        function fetchCourses(showLoadingIndicator = true) {
-            // 檢查刷新冷卻時間
-            const now = Date.now();
-            if (now - lastRefreshTime < REFRESH_COOLDOWN) {
-                debugLog('刷新過於頻繁，跳過此次刷新');
-                return;
-            }
-            
-            lastRefreshTime = now;
-            
-            if (showLoadingIndicator) {
-                showLoading();
-            } else {
-                showRefreshIndicator();
-            }
-            
+        function fetchCourses() {
+            showLoading();
             debugLog('開始讀取課程數據');
             
             // 使用 OpenSheet API 讀取試算表
@@ -814,9 +489,7 @@
                     `;
                 })
                 .finally(() => {
-                    if (showLoadingIndicator) {
-                        hideLoading();
-                    }
+                    hideLoading();
                 });
         }
         
@@ -948,19 +621,11 @@
             document.getElementById('teacher').value = course.teacher;
             document.getElementById('classroom').value = course.classroom;
             
-            // 填充日期下拉選單 (按日期排序)
+            // 填充日期下拉選單
             const dateSelect = document.getElementById('dateSelect');
             dateSelect.innerHTML = '<option value="">請選擇日期</option>';
             
-            // 將日期轉換為可排序的格式並排序
-            const sortedDates = Object.keys(course.dates).sort((a, b) => {
-                // 嘗試將日期轉換為 Date 對象進行比較
-                const dateA = parseChineseDate(a);
-                const dateB = parseChineseDate(b);
-                return dateA - dateB;
-            });
-            
-            sortedDates.forEach(date => {
+            Object.keys(course.dates).sort().forEach(date => {
                 const option = document.createElement('option');
                 option.value = date;
                 option.textContent = date;
@@ -991,27 +656,16 @@
                 if (selectedDate) {
                     updatedTimeSelect.disabled = false;
                     
-                    // 填充對應日期的時間選項 (按時間排序)
-                    const times = course.dates[selectedDate].map(session => ({
-                        time: session.time,
-                        id: session.id,
-                        capacity: session.capacity,
-                        booked: session.booked,
-                        isAvailable: session.booked < session.capacity
-                    }));
-                    
-                    // 按時間排序
-                    times.sort((a, b) => {
-                        return compareTimeStrings(a.time, b.time);
-                    });
-                    
-                    times.forEach(session => {
+                    // 填充對應日期的時間選項
+                    course.dates[selectedDate].forEach(session => {
+                        const isAvailable = session.booked < session.capacity;
+                        
                         const option = document.createElement('option');
                         option.value = session.time;
                         option.textContent = `${session.time} (${session.booked}/${session.capacity})`;
                         option.dataset.id = session.id;
                         
-                        if (!session.isAvailable) {
+                        if (!isAvailable) {
                             option.disabled = true;
                             option.textContent += ' - 已額滿';
                         }
@@ -1052,54 +706,6 @@
             document.getElementById('submitBtn').classList.remove('active');
         }
         
-        // 解析中文日期格式 (例如: "2023年5月1日")
-        function parseChineseDate(dateStr) {
-            try {
-                // 提取年、月、日
-                const yearMatch = dateStr.match(/(\d+)年/);
-                const monthMatch = dateStr.match(/(\d+)月/);
-                const dayMatch = dateStr.match(/(\d+)日/);
-                
-                if (yearMatch && monthMatch && dayMatch) {
-                    const year = parseInt(yearMatch[1]);
-                    const month = parseInt(monthMatch[1]) - 1; // 月份從0開始
-                    const day = parseInt(dayMatch[1]);
-                    
-                    return new Date(year, month, day);
-                }
-                
-                // 如果無法解析，返回一個無效日期
-                return new Date(NaN);
-            } catch (e) {
-                console.error('解析日期失敗:', dateStr, e);
-                return new Date(NaN);
-            }
-        }
-        
-        // 比較時間字符串 (例如: "09:00-10:30")
-        function compareTimeStrings(timeA, timeB) {
-            try {
-                // 提取開始時間
-                const startTimeA = timeA.split('-')[0].trim();
-                const startTimeB = timeB.split('-')[0].trim();
-                
-                // 轉換為24小時制
-                const [hoursA, minutesA] = startTimeA.split(':').map(Number);
-                const [hoursB, minutesB] = startTimeB.split(':').map(Number);
-                
-                // 比較小時
-                if (hoursA !== hoursB) {
-                    return hoursA - hoursB;
-                }
-                
-                // 如果小時相同，比較分鐘
-                return minutesA - minutesB;
-            } catch (e) {
-                console.error('比較時間失敗:', timeA, timeB, e);
-                return 0;
-            }
-        }
-        
         // 檢查表單是否已填寫完整
         function checkFormCompletion() {
             const dateField = document.getElementById('dateSelect');
@@ -1120,9 +726,6 @@
             debugLog('檢查課程空位', courseId);
             
             try {
-                // 顯示確認預約訊息
-                showVerificationMessage("請稍候，系統正在確認課程空位...");
-                
                 // 使用 OpenSheet API 重新獲取最新的課程數據
                 const openSheetUrl = `https://opensheet.elk.sh/${sheetId}/課程`;
                 const response = await fetch(openSheetUrl);
@@ -1158,49 +761,6 @@
                 throw error;
             }
         }
-        
-        // 提交預約資料到試算表並等待回應
-        async function submitReservation(formData) {
-            debugLog('提交預約資料', formData);
-            
-            try {
-                showVerificationMessage("請稍候，系統正在處理您的預約資料...");
-                
-                const response = await fetch(scriptURL, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
-                if (!response.ok) {
-                    throw new Error('提交預約資料失敗');
-                }
-                
-                // 解析 Google Script 回傳的 JSON 結果
-                const result = await response.json();
-                debugLog('預約資料提交結果', result);
-                
-                return result;
-            } catch (error) {
-                console.error('提交預約資料失敗:', error);
-                debugLog('提交預約資料失敗', error);
-                throw error;
-            }
-        }
-        
-        // 返回首頁並重新載入數據
-        function returnToHomeAndRefresh() {
-            document.getElementById('bookingForm').classList.add('hidden');
-            document.getElementById('coursesSection').classList.remove('hidden');
-            
-            // 顯示載入中
-            showLoading();
-            
-            // 減少等待時間，加快返回首頁速度
-            setTimeout(() => {
-                // 重新載入課程數據
-                fetchCourses(true);
-            }, HOME_REFRESH_DELAY);
-        }
 
         // 初始化頁面
         document.addEventListener('DOMContentLoaded', function() {
@@ -1216,9 +776,10 @@
             // 載入課程數據
             fetchCourses();
             
-            // 取消預約表單 - 返回首頁並重新載入數據
+            // 取消預約表單
             document.getElementById('cancelBookingBtn').addEventListener('click', function() {
-                returnToHomeAndRefresh();
+                document.getElementById('bookingForm').classList.add('hidden');
+                document.getElementById('coursesSection').classList.remove('hidden');
             });
             
             // 監聽表單輸入變化
@@ -1252,39 +813,57 @@
                     if (!availability.hasAvailability) {
                         document.getElementById('bookingMsg').innerHTML = '<span class="error">很抱歉，此課程已經額滿，請選擇其他課程</span>';
                         hideLoading();
-                        hideVerificationMessage();
                         document.getElementById('submitBtn').disabled = false;
                         return;
                     }
                     
                     debugLog('課程有空位，繼續預約流程', availability);
                     
-                    // 有空位，提交預約資料並等待回應
+                    // 有空位，繼續預約流程
                     const formData = new FormData(reservationForm);
-                    showVerificationMessage("請稍候，系統正在處理您的預約資料...");
                     
-                    // 提交預約並等待 Google Script 回傳結果
-                    const result = await submitReservation(formData);
+                    const response = await fetch(scriptURL, { method: 'POST', body: formData });
+                    const result = await response.text();
                     
-                    // 根據回傳結果顯示不同訊息
-                    hideVerificationMessage();
+                    debugLog('表單提交成功', result);
+                    document.getElementById('bookingMsg').innerHTML = '<span class="success">預約成功！期待您的光臨！</span>';
                     
-                    if (result.success) {
-                        document.getElementById('bookingMsg').innerHTML = `<span class="success">${result.message || '預約成功！期待您的光臨！'}</span>`;
-                        
-                        // 延遲後返回課程列表並重新載入數據
-                        setTimeout(() => {
-                            returnToHomeAndRefresh();
-                        }, 2000);
-                    } else {
-                        document.getElementById('bookingMsg').innerHTML = `<span class="error">${result.message || '預約失敗，請稍後再試。'}</span>`;
-                    }
+                    // 更新課程預約數量
+                    const selectedDate = dateSelect.value;
+                    const selectedTime = timeSelect.value;
+                    
+                    // 更新對應課程的預約數
+                    Object.values(courseSchedules).forEach(course => {
+                        if (course.dates[selectedDate]) {
+                            const session = course.dates[selectedDate].find(s => s.time === selectedTime && s.id == courseId);
+                            if (session) {
+                                session.booked += 1;
+                                course.booked += 1; // 更新總預約數
+                            }
+                        }
+                    });
+                    
+                    // 清空表單
+                    document.getElementById('name').value = '';
+                    document.getElementById('contact').value = '';
+                    dateSelect.value = '';
+                    timeSelect.innerHTML = '<option value="">請選擇時間</option>';
+                    timeSelect.disabled = true;
+                    
+                    // 重置提交按鈕狀態
+                    document.getElementById('submitBtn').classList.remove('active');
+                    
+                    // 延遲後返回課程列表
+                    setTimeout(() => {
+                        document.getElementById('bookingForm').classList.add('hidden');
+                        document.getElementById('coursesSection').classList.remove('hidden');
+                        renderCourses(); // 重新渲染課程列表
+                    }, 2000);
                     
                 } catch (error) {
                     console.error('預約過程中發生錯誤:', error);
                     debugLog('預約過程中發生錯誤', error);
                     document.getElementById('bookingMsg').innerHTML = '<span class="error">預約失敗，請稍後再試。錯誤: ' + error.message + '</span>';
-                    hideVerificationMessage();
                 } finally {
                     hideLoading();
                     document.getElementById('submitBtn').disabled = false;
@@ -1292,5 +871,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b54144837e4a9a',t:'MTc0OTE4NTA3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5a227a37ea3ac',t:'MTc0OTE4OTAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
