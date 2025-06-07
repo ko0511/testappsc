@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -241,12 +239,395 @@
             max-height: 300px;
             overflow: auto;
         }
+        
+        /* 新的全頁面提示訊息樣式 */
+        .verification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        
+        .verification-container {
+            background-color: #FFF3E0;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #FFD8A8;
+        }
+        
+        .verification-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #B45309;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .verification-message {
+            font-size: 1rem;
+            color: #92400E;
+            margin-bottom: 20px;
+        }
+        
+        /* 成功確認對話框樣式 */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        
+        .success-dialog {
+            background-color: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            border: 3px solid #4F8A10;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #4F8A10;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successPulse 1.5s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .booking-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .booking-details h4 {
+            color: #4F8A10;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .booking-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .booking-detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .booking-detail-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .booking-detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 確保確認按鈕整個區域都可點擊 */
+        .confirm-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 32px;
+            background-color: #4F8A10;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            user-select: none;
+        }
+        
+        .confirm-btn:hover {
+            background-color: #3d6b0d;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(79, 138, 16, 0.3);
+        }
+        
+        .confirm-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(79, 138, 16, 0.3);
+        }
+        
+        /* 可愛的動畫角色 */
+        .character-container {
+            position: relative;
+            height: 120px;
+            width: 100%;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        /* 可愛的雲朵 */
+        .cloud {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.9;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .cloud-1 {
+            width: 60px;
+            height: 60px;
+            top: 10px;
+            left: 20px;
+        }
+        
+        .cloud-2 {
+            width: 80px;
+            height: 80px;
+            top: 5px;
+            left: 60px;
+        }
+        
+        .cloud-3 {
+            width: 70px;
+            height: 70px;
+            top: 15px;
+            left: 120px;
+        }
+        
+        /* 可愛的小動物動畫 */
+        .character {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            bottom: 10px;
+            left: -60px;
+            animation: character-move 4s linear infinite;
+        }
+        
+        @keyframes character-move {
+            0% {
+                left: -60px;
+                transform: translateY(0) rotate(0deg);
+            }
+            10% {
+                transform: translateY(-15px) rotate(5deg);
+            }
+            20% {
+                transform: translateY(0) rotate(0deg);
+            }
+            30% {
+                transform: translateY(-15px) rotate(-5deg);
+            }
+            40% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+            60% {
+                transform: translateY(0) rotate(0deg);
+            }
+            70% {
+                transform: translateY(-10px) rotate(-5deg);
+            }
+            80% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                left: calc(100% + 60px);
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+        
+        /* 星星閃爍動畫 */
+        .star {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            animation: star-twinkle 3s ease-in-out infinite;
+        }
+        
+        .star-1 {
+            top: 20px;
+            left: 30%;
+            animation-delay: 0.5s;
+        }
+        
+        .star-2 {
+            top: 50px;
+            left: 60%;
+            animation-delay: 1.5s;
+        }
+        
+        .star-3 {
+            top: 80px;
+            left: 20%;
+            animation-delay: 2.5s;
+        }
+        
+        @keyframes star-twinkle {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* 彩虹進度條 */
+        .rainbow-progress {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg, #FF9AA2, #FFB7B2, #FFDAC1, #E2F0CB, #B5EAD7, #C7CEEA);
+            background-size: 600% 600%;
+            animation: rainbow-move 3s linear infinite;
+            border-radius: 3px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .rainbow-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            animation: rainbow-shine 2s linear infinite;
+        }
+        
+        @keyframes rainbow-move {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        @keyframes rainbow-shine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
     </style>
 </head>
 <body>
     <!-- 載入中動畫 -->
     <div id="loading" class="loading">
         <div class="spinner"></div>
+    </div>
+    
+    <!-- 處理中提示訊息 -->
+    <div id="verificationOverlay" class="verification-overlay hidden">
+        <div class="verification-container">
+            <div class="verification-title">正在處理您的預約</div>
+            <div class="verification-message">請稍候，系統正在處理您的預約資料...</div>
+            
+            <!-- 可愛的動畫場景 -->
+            <div class="character-container">
+                <!-- 雲朵背景 -->
+                <div class="cloud cloud-1"></div>
+                <div class="cloud cloud-2"></div>
+                <div class="cloud cloud-3"></div>
+                
+                <!-- 星星 -->
+                <svg class="star star-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star star-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star star-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                
+                <!-- 可愛的小動物 -->
+                <svg class="character" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <circle cx="256" cy="256" r="200" fill="#FFE8CC"/>
+                    <circle cx="180" cy="180" r="40" fill="white"/>
+                    <circle cx="330" cy="180" r="40" fill="white"/>
+                    <circle cx="180" cy="180" r="20" fill="#333"/>
+                    <circle cx="330" cy="180" r="20" fill="#333"/>
+                    <ellipse cx="256" cy="280" rx="30" ry="20" fill="#FF9AA2"/>
+                    <path d="M150 120 L180 80 L210 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M300 120 L330 80 L360 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <!-- 彩虹進度條 -->
+            <div class="rainbow-progress"></div>
+        </div>
+    </div>
+
+    <!-- 成功預約確認對話框 -->
+    <div id="successOverlay" class="success-overlay hidden">
+        <div class="success-dialog">
+            <div class="success-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-green-600 mb-4">預約成功！</h3>
+            <p class="text-gray-600 mb-6">恭喜您成功預約課程，以下是您的預約詳細資料：</p>
+            
+            <div class="booking-details">
+                <h4>預約詳細資料</h4>
+                <div id="bookingDetailsContent">
+                    <!-- 預約詳細資料將在這裡動態填入 -->
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-500 mb-6">請確認以上資料無誤，並準時參加課程。</p>
+            
+            <button id="confirmSuccessBtn" class="confirm-btn">
+                確定
+            </button>
+        </div>
     </div>
 
     <!-- 頂部導航 -->
@@ -349,8 +730,13 @@
         const sheetId = '10X8yQ1657B4hdYCDJaCxjjiBUXv5aOAToJV64MaIXOc';
         let courses = [];
         let currentCourse = null;
-        let courseSchedules = {}; // 存儲相同課程名稱和教師的不同日期和時間
-        let debugMode = false; // 調試模式
+        let courseSchedules = {};
+        let debugMode = false;
+        let lastRefreshTime = 0;
+        let autoRefreshInterval = null;
+        let currentBookingData = null;
+        const REFRESH_COOLDOWN = 1000; // 減少刷新冷卻時間到1秒
+        const AUTO_REFRESH_INTERVAL = 2000; // 每2秒自動刷新
 
         // 顯示載入中
         function showLoading() {
@@ -360,6 +746,61 @@
         // 隱藏載入中
         function hideLoading() {
             document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 顯示處理中訊息
+        function showVerificationMessage(message = "請稍候，系統正在處理您的預約資料...") {
+            const verificationMessage = document.querySelector('.verification-message');
+            verificationMessage.textContent = message;
+            document.getElementById('verificationOverlay').classList.remove('hidden');
+        }
+        
+        // 隱藏處理中訊息
+        function hideVerificationMessage() {
+            document.getElementById('verificationOverlay').classList.add('hidden');
+        }
+        
+        // 顯示成功預約確認對話框
+        function showSuccessDialog(bookingData) {
+            const detailsContent = document.getElementById('bookingDetailsContent');
+            
+            detailsContent.innerHTML = `
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">課程名稱：</span>
+                    <span class="booking-detail-value">${bookingData.courseName}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">教師姓名：</span>
+                    <span class="booking-detail-value">${bookingData.teacher}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">教室：</span>
+                    <span class="booking-detail-value">${bookingData.classroom}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">預約日期：</span>
+                    <span class="booking-detail-value">${bookingData.date}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">課程時間：</span>
+                    <span class="booking-detail-value">${bookingData.time}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">預約姓名：</span>
+                    <span class="booking-detail-value">${bookingData.name}</span>
+                </div>
+                <div class="booking-detail-item">
+                    <span class="booking-detail-label">聯絡方式：</span>
+                    <span class="booking-detail-value">${bookingData.contact}</span>
+                </div>
+            `;
+            
+            document.getElementById('successOverlay').classList.remove('hidden');
+        }
+        
+        // 隱藏成功預約確認對話框
+        function hideSuccessDialog() {
+            document.getElementById('successOverlay').classList.add('hidden');
         }
         
         // 調試日誌
@@ -374,122 +815,167 @@
         
         // 顯示數據預覽
         function showDataPreview(data) {
-            if (debugMode) {
+            if (debugMode && data && data.length > 0) {
                 const dataPreview = document.getElementById('dataPreview');
                 dataPreview.classList.remove('hidden');
                 
-                // 創建表格顯示數據
-                let html = '<h3>數據預覽</h3><table border="1" style="border-collapse: collapse;">';
+                let html = '<h3>OpenSheet 數據預覽</h3><table border="1" style="border-collapse: collapse;">';
                 
                 // 表頭
                 html += '<tr>';
                 for (const key in data[0]) {
-                    html += `<th style="padding: 5px;">${key}</th>`;
+                    html += `<th style="padding: 5px; background: #f0f0f0;">${key}</th>`;
                 }
                 html += '</tr>';
                 
-                // 數據行 (最多顯示5行)
-                const maxRows = Math.min(data.length, 5);
+                // 數據行 (最多顯示3行)
+                const maxRows = Math.min(data.length, 3);
                 for (let i = 0; i < maxRows; i++) {
                     html += '<tr>';
                     for (const key in data[0]) {
-                        html += `<td style="padding: 5px;">${data[i][key]}</td>`;
+                        html += `<td style="padding: 5px;">${data[i][key] || ''}</td>`;
                     }
                     html += '</tr>';
                 }
                 
                 html += '</table>';
+                html += `<p style="margin-top: 10px;">總共 ${data.length} 筆資料</p>`;
                 dataPreview.innerHTML = html;
             }
         }
 
+        // 啟動自動刷新
+        function startAutoRefresh() {
+            // 清除現有的自動刷新
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            // 設置新的自動刷新 - 每2秒靜默更新
+            autoRefreshInterval = setInterval(() => {
+                debugLog('自動靜默刷新課程數據');
+                fetchCourses(false, true); // 靜默模式，不顯示任何提示
+            }, AUTO_REFRESH_INTERVAL);
+        }
+        
+        // 停止自動刷新
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
         // 使用 OpenSheet 格式讀取課程數據
-        function fetchCourses() {
-            showLoading();
-            debugLog('開始讀取課程數據');
+        function fetchCourses(showLoadingIndicator = true, silentMode = false) {
+            const now = Date.now();
+            if (now - lastRefreshTime < REFRESH_COOLDOWN) {
+                debugLog('刷新過於頻繁，跳過此次刷新');
+                return Promise.resolve();
+            }
+            
+            lastRefreshTime = now;
+            
+            // 靜默模式下不顯示任何載入提示
+            if (!silentMode && showLoadingIndicator) {
+                showLoading();
+            }
+            
+            debugLog('開始讀取課程數據 - OpenSheet API', silentMode ? '(靜默模式)' : '');
             
             // 使用 OpenSheet API 讀取試算表
             const openSheetUrl = `https://opensheet.elk.sh/${sheetId}/課程`;
             
-            fetch(openSheetUrl)
+            return fetch(openSheetUrl)
                 .then(response => {
-                    debugLog('收到 OpenSheet 回應', response);
+                    debugLog('OpenSheet API 回應狀態', response.status);
                     if (!response.ok) {
-                        throw new Error('OpenSheet API 回應錯誤: ' + response.status);
+                        throw new Error(`OpenSheet API 錯誤: ${response.status} ${response.statusText}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    debugLog('解析 OpenSheet 數據', data);
+                    debugLog('OpenSheet 原始數據', data);
                     
                     if (debugMode) {
-                        // 顯示原始數據的欄位名稱
                         if (data && data.length > 0) {
-                            console.log('原始數據欄位名稱:', Object.keys(data[0]));
+                            console.log('OpenSheet 欄位名稱:', Object.keys(data[0]));
                             showDataPreview(data);
                         }
                     }
                     
-                    if (data && data.length > 0) {
-                        // 解析數據 - 使用正確的欄位名稱
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        // 解析數據
                         const parsedCourses = data.map((row, index) => {
-                            // 檢查並顯示每一行的數據
                             if (debugMode) {
                                 console.log(`第 ${index + 1} 行數據:`, row);
                             }
                             
-                            // 嘗試獲取已預約人數，處理可能的不同格式
+                            // 處理已預約人數
                             let bookedCount = 0;
-                            if (row['已預約人數'] !== undefined) {
-                                bookedCount = parseInt(row['已預約人數']) || 0;
-                            }
+                            const bookedField = row['已預約人數'] || row['已預約'] || row['booked'] || '0';
+                            bookedCount = parseInt(bookedField) || 0;
+                            
+                            // 處理容量
+                            let capacity = 0;
+                            const capacityField = row['容量'] || row['capacity'] || row['人數上限'] || '0';
+                            capacity = parseInt(capacityField) || 0;
                             
                             return {
-                                id: index + 1, // 使用索引作為ID
-                                name: row['課程名稱'] || '',
-                                teacher: row['教師姓名'] || '',
-                                classroom: row['教室'] || '',
-                                date: row['日期'] || '',
-                                time: row['時間'] || '',
-                                capacity: parseInt(row['容量']) || 0,
+                                id: index + 1,
+                                name: row['課程名稱'] || row['name'] || '',
+                                teacher: row['教師姓名'] || row['teacher'] || row['講師'] || '',
+                                classroom: row['教室'] || row['classroom'] || row['地點'] || '',
+                                date: row['日期'] || row['date'] || '',
+                                time: row['時間'] || row['time'] || '',
+                                capacity: capacity,
                                 booked: bookedCount
                             };
                         });
                         
                         debugLog('解析後的課程數據', parsedCourses);
-                        courses = parsedCourses.filter(course => course.name); // 過濾掉無效數據
                         
-                        // 組織相同課程名稱和教師的課程
-                        organizeCoursesSchedule();
+                        // 過濾有效數據
+                        courses = parsedCourses.filter(course => 
+                            course.name && course.name.trim() !== '' &&
+                            course.teacher && course.teacher.trim() !== ''
+                        );
                         
-                        renderCourses();
+                        debugLog('過濾後的有效課程數據', courses);
+                        
+                        if (courses.length > 0) {
+                            organizeCoursesSchedule();
+                            renderCourses();
+                        } else {
+                            throw new Error('沒有找到有效的課程數據');
+                        }
                     } else {
-                        console.error('無法解析試算表數據或數據為空');
-                        document.getElementById('coursesList').innerHTML = `
-                            <div class="col-span-full text-center py-8">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                </svg>
-                                <p class="text-gray-500">目前沒有可預約的課程</p>
-                            </div>
-                        `;
+                        throw new Error('OpenSheet 回傳的數據格式不正確或為空');
                     }
                 })
                 .catch(error => {
-                    console.error('獲取課程數據失敗:', error);
-                    debugLog('獲取課程數據失敗', error);
-                    document.getElementById('coursesList').innerHTML = `
-                        <div class="col-span-full text-center py-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <p class="text-gray-500">載入課程資料失敗，請稍後再試</p>
-                            <p class="text-sm text-gray-400 mt-2">錯誤訊息: ${error.message}</p>
-                        </div>
-                    `;
+                    // 靜默模式下不顯示錯誤訊息
+                    if (!silentMode) {
+                        console.error('獲取課程數據失敗:', error);
+                        debugLog('獲取課程數據失敗', error);
+                        document.getElementById('coursesList').innerHTML = `
+                            <div class="col-span-full text-center py-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <p class="text-gray-500">載入課程資料失敗</p>
+                                <p class="text-sm text-gray-400 mt-2">錯誤: ${error.message}</p>
+                                <p class="text-sm text-gray-400">請檢查 OpenSheet 設定是否正確</p>
+                            </div>
+                        `;
+                    } else {
+                        debugLog('靜默模式下獲取課程數據失敗', error);
+                    }
                 })
                 .finally(() => {
-                    hideLoading();
+                    if (!silentMode && showLoadingIndicator) {
+                        hideLoading();
+                    }
                 });
         }
         
@@ -523,7 +1009,6 @@
                     booked: course.booked
                 });
                 
-                // 累計總容量和已預約人數
                 courseSchedules[key].capacity += course.capacity;
                 courseSchedules[key].booked += course.booked;
             });
@@ -548,7 +1033,6 @@
                 return;
             }
             
-            // 使用組織好的課程數據
             Object.values(courseSchedules).forEach(course => {
                 const isDisabled = course.booked >= course.capacity;
                 const card = document.createElement('div');
@@ -557,7 +1041,6 @@
                 const statusColor = isDisabled ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600';
                 const randomColor = ['bg-primary-light', 'bg-secondary-light', 'bg-accent-light'][Math.floor(Math.random() * 3)];
                 
-                // 計算課程場次數量
                 let totalSessions = 0;
                 Object.keys(course.dates).forEach(date => {
                     totalSessions += course.dates[date].length;
@@ -590,7 +1073,7 @@
                             <span class="font-medium">${course.booked}</span>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6">
-                            <div class="bg-primary h-2.5 rounded-full" style="width: ${(course.booked / course.capacity) * 100}%"></div>
+                            <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.min((course.booked / course.capacity) * 100, 100)}%"></div>
                         </div>
                         <button class="book-btn w-full py-2.5 rounded-lg ${isDisabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-primary text-white hover:bg-primary-dark pulse'} transition font-medium" 
                             ${isDisabled ? 'disabled' : ''} data-course-key="${course.name}-${course.teacher}">
@@ -614,6 +1097,9 @@
         function showBookingForm(course) {
             currentCourse = course;
             
+            // 停止自動刷新
+            stopAutoRefresh();
+            
             document.getElementById('coursesSection').classList.add('hidden');
             document.getElementById('bookingForm').classList.remove('hidden');
             
@@ -625,7 +1111,13 @@
             const dateSelect = document.getElementById('dateSelect');
             dateSelect.innerHTML = '<option value="">請選擇日期</option>';
             
-            Object.keys(course.dates).sort().forEach(date => {
+            const sortedDates = Object.keys(course.dates).sort((a, b) => {
+                const dateA = parseChineseDate(a);
+                const dateB = parseChineseDate(b);
+                return dateA - dateB;
+            });
+            
+            sortedDates.forEach(date => {
                 const option = document.createElement('option');
                 option.value = date;
                 option.textContent = date;
@@ -637,18 +1129,32 @@
             timeSelect.innerHTML = '<option value="">請選擇時間</option>';
             timeSelect.disabled = true;
             
-            // 移除之前的事件監聽器
+            // 重新設置事件監聽器
+            setupFormEventListeners(course);
+            
+            // 清空其他表單字段
+            document.getElementById('name').value = '';
+            document.getElementById('contact').value = '';
+            document.getElementById('bookingMsg').innerHTML = '';
+            document.getElementById('submitBtn').classList.remove('active');
+        }
+        
+        // 設置表單事件監聽器
+        function setupFormEventListeners(course) {
+            const dateSelect = document.getElementById('dateSelect');
+            const timeSelect = document.getElementById('timeSelect');
+            
+            // 移除舊的事件監聽器
             const newDateSelect = dateSelect.cloneNode(true);
             dateSelect.parentNode.replaceChild(newDateSelect, dateSelect);
             
             const newTimeSelect = timeSelect.cloneNode(true);
             timeSelect.parentNode.replaceChild(newTimeSelect, timeSelect);
             
-            // 重新獲取元素
+            // 重新獲取元素並添加事件監聽器
             const updatedDateSelect = document.getElementById('dateSelect');
             const updatedTimeSelect = document.getElementById('timeSelect');
             
-            // 監聽日期選擇變化
             updatedDateSelect.addEventListener('change', function() {
                 const selectedDate = this.value;
                 updatedTimeSelect.innerHTML = '<option value="">請選擇時間</option>';
@@ -656,16 +1162,23 @@
                 if (selectedDate) {
                     updatedTimeSelect.disabled = false;
                     
-                    // 填充對應日期的時間選項
-                    course.dates[selectedDate].forEach(session => {
-                        const isAvailable = session.booked < session.capacity;
-                        
+                    const times = course.dates[selectedDate].map(session => ({
+                        time: session.time,
+                        id: session.id,
+                        capacity: session.capacity,
+                        booked: session.booked,
+                        isAvailable: session.booked < session.capacity
+                    }));
+                    
+                    times.sort((a, b) => compareTimeStrings(a.time, b.time));
+                    
+                    times.forEach(session => {
                         const option = document.createElement('option');
                         option.value = session.time;
                         option.textContent = `${session.time} (${session.booked}/${session.capacity})`;
                         option.dataset.id = session.id;
                         
-                        if (!isAvailable) {
+                        if (!session.isAvailable) {
                             option.disabled = true;
                             option.textContent += ' - 已額滿';
                         }
@@ -679,13 +1192,11 @@
                 checkFormCompletion();
             });
             
-            // 監聽時間選擇變化
             updatedTimeSelect.addEventListener('change', function() {
                 const selectedDate = updatedDateSelect.value;
                 const selectedTime = this.value;
                 
                 if (selectedDate && selectedTime) {
-                    // 找到對應的課程ID
                     const selectedSession = course.dates[selectedDate].find(s => s.time === selectedTime);
                     if (selectedSession) {
                         document.getElementById('courseId').value = selectedSession.id;
@@ -694,16 +1205,47 @@
                 
                 checkFormCompletion();
             });
-            
-            // 清空其他表單字段
-            document.getElementById('name').value = '';
-            document.getElementById('contact').value = '';
-            
-            // 清空消息
-            document.getElementById('bookingMsg').innerHTML = '';
-            
-            // 重置提交按鈕狀態
-            document.getElementById('submitBtn').classList.remove('active');
+        }
+        
+        // 解析中文日期格式
+        function parseChineseDate(dateStr) {
+            try {
+                const yearMatch = dateStr.match(/(\d+)年/);
+                const monthMatch = dateStr.match(/(\d+)月/);
+                const dayMatch = dateStr.match(/(\d+)日/);
+                
+                if (yearMatch && monthMatch && dayMatch) {
+                    const year = parseInt(yearMatch[1]);
+                    const month = parseInt(monthMatch[1]) - 1;
+                    const day = parseInt(dayMatch[1]);
+                    return new Date(year, month, day);
+                }
+                
+                return new Date(NaN);
+            } catch (e) {
+                console.error('解析日期失敗:', dateStr, e);
+                return new Date(NaN);
+            }
+        }
+        
+        // 比較時間字符串
+        function compareTimeStrings(timeA, timeB) {
+            try {
+                const startTimeA = timeA.split('-')[0].trim();
+                const startTimeB = timeB.split('-')[0].trim();
+                
+                const [hoursA, minutesA] = startTimeA.split(':').map(Number);
+                const [hoursB, minutesB] = startTimeB.split(':').map(Number);
+                
+                if (hoursA !== hoursB) {
+                    return hoursA - hoursB;
+                }
+                
+                return minutesA - minutesB;
+            } catch (e) {
+                console.error('比較時間失敗:', timeA, timeB, e);
+                return 0;
+            }
         }
         
         // 檢查表單是否已填寫完整
@@ -720,66 +1262,75 @@
                 submitBtn.classList.remove('active');
             }
         }
-
-        // 檢查課程是否還有空位
-        async function checkCourseAvailability(courseId) {
-            debugLog('檢查課程空位', courseId);
+        
+        // 提交預約資料
+        async function submitReservation(formData) {
+            debugLog('提交預約資料', formData);
             
             try {
-                // 使用 OpenSheet API 重新獲取最新的課程數據
-                const openSheetUrl = `https://opensheet.elk.sh/${sheetId}/課程`;
-                const response = await fetch(openSheetUrl);
+                showVerificationMessage("請稍候，系統正在處理您的預約資料...");
+                
+                const response = await fetch(scriptURL, { 
+                    method: 'POST', 
+                    body: formData 
+                });
                 
                 if (!response.ok) {
-                    throw new Error('檢查課程空位時發生錯誤');
+                    throw new Error(`提交失敗: ${response.status} ${response.statusText}`);
                 }
                 
-                const data = await response.json();
+                const result = await response.json();
+                debugLog('預約提交結果', result);
                 
-                // 找到對應的課程
-                const courseData = data.find((row, index) => (index + 1) == courseId);
-                
-                if (!courseData) {
-                    throw new Error('找不到對應的課程');
-                }
-                
-                // 解析容量和已預約人數
-                const capacity = parseInt(courseData['容量']) || 0;
-                const booked = parseInt(courseData['已預約人數']) || 0;
-                
-                debugLog('課程空位檢查結果', { courseId, capacity, booked });
-                
-                // 返回是否有空位
-                return {
-                    hasAvailability: booked < capacity,
-                    capacity: capacity,
-                    booked: booked
-                };
+                return result;
             } catch (error) {
-                console.error('檢查課程空位失敗:', error);
-                debugLog('檢查課程空位失敗', error);
+                console.error('提交預約資料失敗:', error);
+                debugLog('提交預約資料失敗', error);
                 throw error;
             }
+        }
+        
+        // 返回首頁（不顯示載入中）
+        function returnToHome() {
+            document.getElementById('bookingForm').classList.add('hidden');
+            document.getElementById('coursesSection').classList.remove('hidden');
+            
+            // 重新啟動自動刷新
+            startAutoRefresh();
+            
+            // 立即靜默刷新一次數據
+            fetchCourses(false, true);
         }
 
         // 初始化頁面
         document.addEventListener('DOMContentLoaded', function() {
-            // 檢查是否啟用調試模式
+            // 檢查調試模式
             const urlParams = new URLSearchParams(window.location.search);
             debugMode = urlParams.has('debug');
             
             if (debugMode) {
                 document.getElementById('debugInfo').classList.remove('hidden');
                 document.getElementById('dataPreview').classList.remove('hidden');
+                console.log('調試模式已啟用');
             }
             
             // 載入課程數據
-            fetchCourses();
+            fetchCourses().then(() => {
+                // 啟動自動刷新
+                startAutoRefresh();
+            });
             
             // 取消預約表單
             document.getElementById('cancelBookingBtn').addEventListener('click', function() {
-                document.getElementById('bookingForm').classList.add('hidden');
-                document.getElementById('coursesSection').classList.remove('hidden');
+                returnToHome();
+            });
+            
+            // 成功確認按鈕 - 確保整個按鈕區域都可點擊
+            document.getElementById('confirmSuccessBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideSuccessDialog();
+                returnToHome();
             });
             
             // 監聽表單輸入變化
@@ -795,7 +1346,6 @@
                 
                 const dateSelect = document.getElementById('dateSelect');
                 const timeSelect = document.getElementById('timeSelect');
-                const courseId = document.getElementById('courseId').value;
                 
                 if (!dateSelect.value || !timeSelect.value) {
                     document.getElementById('bookingMsg').innerHTML = '<span class="error">請選擇日期和時間</span>';
@@ -807,69 +1357,53 @@
                 document.getElementById('bookingMsg').innerHTML = '';
                 
                 try {
-                    // 先檢查課程是否還有空位
-                    const availability = await checkCourseAvailability(courseId);
-                    
-                    if (!availability.hasAvailability) {
-                        document.getElementById('bookingMsg').innerHTML = '<span class="error">很抱歉，此課程已經額滿，請選擇其他課程</span>';
-                        hideLoading();
-                        document.getElementById('submitBtn').disabled = false;
-                        return;
-                    }
-                    
-                    debugLog('課程有空位，繼續預約流程', availability);
-                    
-                    // 有空位，繼續預約流程
                     const formData = new FormData(reservationForm);
                     
-                    const response = await fetch(scriptURL, { method: 'POST', body: formData });
-                    const result = await response.text();
+                    // 儲存預約資料用於確認對話框
+                    currentBookingData = {
+                        courseName: formData.get('courseName'),
+                        teacher: formData.get('teacher'),
+                        classroom: formData.get('classroom'),
+                        date: formData.get('date'),
+                        time: formData.get('time'),
+                        name: formData.get('name'),
+                        contact: formData.get('contact')
+                    };
                     
-                    debugLog('表單提交成功', result);
-                    document.getElementById('bookingMsg').innerHTML = '<span class="success">預約成功！期待您的光臨！</span>';
+                    showVerificationMessage("請稍候，系統正在處理您的預約資料...");
                     
-                    // 更新課程預約數量
-                    const selectedDate = dateSelect.value;
-                    const selectedTime = timeSelect.value;
+                    const result = await submitReservation(formData);
                     
-                    // 更新對應課程的預約數
-                    Object.values(courseSchedules).forEach(course => {
-                        if (course.dates[selectedDate]) {
-                            const session = course.dates[selectedDate].find(s => s.time === selectedTime && s.id == courseId);
-                            if (session) {
-                                session.booked += 1;
-                                course.booked += 1; // 更新總預約數
-                            }
-                        }
-                    });
+                    hideVerificationMessage();
                     
-                    // 清空表單
-                    document.getElementById('name').value = '';
-                    document.getElementById('contact').value = '';
-                    dateSelect.value = '';
-                    timeSelect.innerHTML = '<option value="">請選擇時間</option>';
-                    timeSelect.disabled = true;
-                    
-                    // 重置提交按鈕狀態
-                    document.getElementById('submitBtn').classList.remove('active');
-                    
-                    // 延遲後返回課程列表
-                    setTimeout(() => {
-                        document.getElementById('bookingForm').classList.add('hidden');
-                        document.getElementById('coursesSection').classList.remove('hidden');
-                        renderCourses(); // 重新渲染課程列表
-                    }, 2000);
+                    if (result.success) {
+                        // 顯示成功確認對話框
+                        showSuccessDialog(currentBookingData);
+                    } else {
+                        document.getElementById('bookingMsg').innerHTML = `<span class="error">${result.message || '預約失敗，請稍後再試。'}</span>`;
+                    }
                     
                 } catch (error) {
                     console.error('預約過程中發生錯誤:', error);
                     debugLog('預約過程中發生錯誤', error);
-                    document.getElementById('bookingMsg').innerHTML = '<span class="error">預約失敗，請稍後再試。錯誤: ' + error.message + '</span>';
+                    document.getElementById('bookingMsg').innerHTML = `<span class="error">預約失敗：${error.message}</span>`;
+                    hideVerificationMessage();
                 } finally {
                     hideLoading();
                     document.getElementById('submitBtn').disabled = false;
                 }
             });
+            
+            // 頁面可見性變化時的處理
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    // 頁面變為可見時，靜默刷新數據
+                    if (document.getElementById('coursesSection').style.display !== 'none') {
+                        fetchCourses(false, true);
+                    }
+                }
+            });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b5a227a37ea3ac',t:'MTc0OTE4OTAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
