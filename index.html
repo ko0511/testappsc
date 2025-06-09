@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程預約系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#F9E6E8',
+                            DEFAULT: '#E4A9AF',
+                            dark: '#C97F85'
+                        },
+                        secondary: {
+                            light: '#E6F0F9',
+                            DEFAULT: '#A9C7E4',
+                            dark: '#7F9FC9'
+                        },
+                        accent: {
+                            light: '#FFF3E0',
+                            DEFAULT: '#FFD8A8',
+                            dark: '#FFC166'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #E4A9AF;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .course-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: auto;
+            min-height: 400px;
+        }
+        .course-card:hover:not(.disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .course-card.hidden {
+            display: none;
+        }
+        .disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .success {
+            color: #4F8A10;
+            background-color: #DFF2BF;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .error {
+            color: #D8000C;
+            background-color: #FFBABA;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        
+        /* 表單驗證樣式 */
+        .form-field {
+            position: relative;
+        }
+        
+        .form-field input.invalid {
+            border-color: #DC2626;
+            background-color: #FEF2F2;
+        }
+        
+        .form-field input.valid {
+            border-color: #059669;
+            background-color: #F0FDF4;
+        }
+        
+        .form-error {
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        
+        .form-error.show {
+            display: block;
+        }
+        
+        /* 優化後的分類篩選樣式 - 手機版本優化 */
+        .filter-section {
+            background: linear-gradient(135deg, #E4A9AF 0%, #A9C7E4 50%, #FFD8A8 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 手機版本優化 */
+        @media (max-width: 768px) {
+            .filter-section {
+                padding: 12px;
+                margin-bottom: 16px;
+                border-radius: 8px;
+            }
+            
+            .filter-grid {
+                gap: 8px !important;
+            }
+            
+            .filter-step {
+                margin-bottom: 8px;
+            }
+            
+            .filter-step:last-child {
+                margin-bottom: 0;
+            }
+        }
+        
+        .filter-step {
+            margin-bottom: 12px;
+        }
+        
+        .filter-step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+            font-size: 14px;
+        }
+        
+        /* 手機版本標籤優化 */
+        @media (max-width: 768px) {
+            .filter-label {
+                margin-bottom: 4px;
+                font-size: 13px;
+            }
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #D1D5DB;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-height: 48px; /* 增加最小觸控區域 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        /* 手機版本選擇框優化 */
+        @media (max-width: 768px) {
+            .filter-select {
+                padding: 14px 16px;
+                font-size: 16px; /* 防止 iOS 縮放 */
+                min-height: 52px; /* 增加觸控區域 */
+                border-radius: 6px;
+            }
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #E4A9AF;
+            box-shadow: 0 0 0 3px rgba(228, 169, 175, 0.1);
+        }
+        
+        .filter-select:disabled {
+            background-color: #F3F4F6;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+        
+        /* 課程日期顯示樣式 */
+        .course-dates-section {
+            margin-bottom: 16px;
+            min-height: 80px;
+        }
+        
+        .course-dates-title {
+            font-weight: 500;
+            color: #4B5563;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .course-dates-content {
+            line-height: 1.5;
+            font-size: 13px;
+        }
+        
+        .date-item {
+            display: inline-block;
+            margin-right: 8px;
+            margin-bottom: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #F3F4F6;
+        }
+        
+        .date-item.full {
+            background-color: #E5E7EB;
+            color: #9CA3AF;
+            text-decoration: line-through;
+        }
+        
+        /* 動態效果 */
+        .animated-bg {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .animated-bg-1 {
+            top: -30px;
+            left: -30px;
+            background-color: #E4A9AF;
+            animation-delay: 0s;
+        }
+        
+        .animated-bg-2 {
+            bottom: -20px;
+            right: -20px;
+            background-color: #A9C7E4;
+            animation-delay: 2s;
+        }
+        
+        .animated-bg-3 {
+            top: 50%;
+            right: -40px;
+            background-color: #FFD8A8;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.1);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(228, 169, 175, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(228, 169, 175, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(228, 169, 175, 0);
+            }
+        }
+        
+        .submit-btn {
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .submit-btn.active {
+            opacity: 1;
+            cursor: pointer;
+        }
+        
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        .color-bar {
+            height: 4px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(90deg, #E4A9AF, #A9C7E4, #FFD8A8);
+            background-size: 200% 100%;
+            animation: gradientMove 3s ease infinite;
+        }
+        
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 80%;
+            overflow: auto;
+            max-height: 200px;
+        }
+        
+        .data-preview {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 300px;
+            overflow: auto;
+        }
+        
+        /* 調整後的等待動畫 - 中慢板速度，簡潔顏色 */
+        .verification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            animation: overlayFadeIn 0.8s ease-out;
+        }
+        
+        @keyframes overlayFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(8px);
+            }
+        }
+        
+        .verification-container {
+            background: linear-gradient(135deg, #FEFEFE, #F8F9FA);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 90%;
+            width: 420px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(228, 169, 175, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: containerSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        @keyframes containerSlideIn {
+            from {
+                transform: translateY(20px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .verification-title {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #6B7280;
+            margin-bottom: 12px;
+            text-align: center;
+            animation: titleGlow 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                color: #6B7280;
+            }
+            to {
+                color: #E4A9AF;
+            }
+        }
+        
+        .verification-message {
+            font-size: 1rem;
+            color: #9CA3AF;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+        
+        /* 成功確認對話框樣式 - 優化尺寸和字體 */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            padding: 20px;
+        }
+        
+        .success-dialog {
+            background-color: white;
+            border-radius: 16px;
+            padding: 16px;
+            max-width: 95%;
+            width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            position: relative;
+            border: 3px solid #A8D5BA;
+        }
+        
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #A8D5BA, #E4A9AF);
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: successPulse 1.5s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .booking-details {
+            background: linear-gradient(135deg, #FDF2F8, #F0F9FF);
+            border-radius: 8px;
+            padding: 8px;
+            margin: 8px 0;
+            text-align: left;
+            border: 1px solid #F8BBD9;
+        }
+
+        .booking-detail-item {
+            display: inline-block;
+            margin-right: 4px;
+            margin-bottom: 2px;
+            padding: 2px 6px;
+            border: 1px solid #F8BBD9;
+            border-radius: 4px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #FEFCFF, #FFF7ED);
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        
+        .booking-detail-item:last-child {
+            
+        }
+        
+        .booking-detail-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .booking-detail-value {
+            font-weight: bold;
+            color: #333;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+        
+        /* 優化所有按鈕的觸控體驗 */
+        .btn-base {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px; /* 最小觸控區域 */
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高亮 */
+        }
+        
+        /* 手機版本按鈕優化 */
+        @media (max-width: 768px) {
+            .btn-base {
+                min-height: 52px;
+                padding: 14px 24px;
+                font-size: 16px;
+            }
+        }
+        
+        /* 按鈕點擊反饋效果 */
+        .btn-base::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+        
+        .btn-base:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* 確保確認按鈕整個區域都可點擊 */
+        .confirm-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #A8D5BA, #E4A9AF);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            user-select: none;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(168, 213, 186, 0.3);
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 手機版本確認按鈕 */
+        @media (max-width: 768px) {
+            .confirm-btn {
+                min-height: 52px;
+                padding: 14px 24px;
+            }
+        }
+
+        .confirm-btn:hover {
+            background: linear-gradient(135deg, #96C9AA, #D89AA4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(168, 213, 186, 0.4);
+        }
+
+        .confirm-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(168, 213, 186, 0.3);
+        }
+        
+        /* 立即預約按鈕樣式 */
+        .book-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            margin-top: auto;
+            min-height: 48px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 手機版本預約按鈕 */
+        @media (max-width: 768px) {
+            .book-btn {
+                min-height: 52px;
+                padding: 14px 20px;
+                font-size: 16px;
+            }
+        }
+        
+        .book-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(228, 169, 175, 0.3);
+        }
+        
+        .book-btn:not(:disabled):active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(228, 169, 175, 0.3);
+        }
+        
+        .book-btn:disabled {
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 清除篩選按鈕優化 */
+        .clear-filter-btn {
+            min-height: 48px;
+            padding: 12px 24px;
+            background: #F3F4F6;
+            color: #374151;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 手機版本清除按鈕 */
+        @media (max-width: 768px) {
+            .clear-filter-btn {
+                min-height: 52px;
+                padding: 14px 28px;
+                font-size: 16px;
+                width: 100%;
+            }
+        }
+        
+        .clear-filter-btn:hover {
+            background: #E5E7EB;
+            transform: translateY(-1px);
+        }
+        
+        .clear-filter-btn:active {
+            background: #D1D5DB;
+            transform: translateY(0);
+        }
+        
+        /* 表單按鈕優化 */
+        .form-btn {
+            min-height: 48px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 手機版本表單按鈕 */
+        @media (max-width: 768px) {
+            .form-btn {
+                min-height: 52px;
+                padding: 14px 28px;
+            }
+        }
+        
+        /* 簡潔溫和的動畫場景 */
+        .character-container {
+            position: relative;
+            height: 140px;
+            width: 100%;
+            margin: 24px 0;
+            overflow: hidden;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #F8F9FA, #F1F5F9);
+            animation: gentleGradient 12s ease infinite;
+        }
+        
+        @keyframes gentleGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* 溫和的雲朵設計 */
+        .cloud {
+            position: absolute;
+            background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            border-radius: 50px;
+            opacity: 0.8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            animation: gentleFloat 16s ease-in-out infinite;
+        }
+        
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50px;
+        }
+        
+        .cloud-1 {
+            width: 70px;
+            height: 50px;
+            top: 15px;
+            left: 20px;
+            animation-delay: 0s;
+        }
+        
+        .cloud-1::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+        
+        .cloud-1::after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
+        }
+        
+        .cloud-2 {
+            width: 90px;
+            height: 60px;
+            top: 10px;
+            right: 30px;
+            animation-delay: 5s;
+        }
+        
+        .cloud-2::before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 15px;
+        }
+        
+        .cloud-2::after {
+            width: 70px;
+            height: 50px;
+            top: -20px;
+            right: 15px;
+        }
+        
+        .cloud-3 {
+            width: 80px;
+            height: 55px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 10s;
+        }
+        
+        .cloud-3::before {
+            width: 55px;
+            height: 55px;
+            top: -25px;
+            left: 12px;
+        }
+        
+        .cloud-3::after {
+            width: 65px;
+            height: 45px;
+            top: -18px;
+            right: 12px;
+        }
+        
+        @keyframes gentleFloat {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            33% {
+                transform: translateY(-5px) translateX(3px);
+            }
+            66% {
+                transform: translateY(-3px) translateX(-2px);
+            }
+        }
+        
+        /* 溫和的小動物角色 */
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            bottom: 15px;
+            left: -80px;
+            animation: gentleJourney 20s linear infinite;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+        }
+        
+        @keyframes gentleJourney {
+            0% {
+                left: -80px;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            15% {
+                transform: translateY(-8px) rotate(3deg) scale(1.02);
+            }
+            30% {
+                transform: translateY(-2px) rotate(-2deg) scale(0.98);
+            }
+            45% {
+                transform: translateY(-10px) rotate(4deg) scale(1.03);
+            }
+            60% {
+                transform: translateY(-4px) rotate(-3deg) scale(0.97);
+            }
+            75% {
+                transform: translateY(-6px) rotate(2deg) scale(1.01);
+            }
+            90% {
+                transform: translateY(-3px) rotate(-1deg) scale(0.99);
+            }
+            100% {
+                left: calc(100% + 80px);
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+        }
+        
+        /* 簡潔的星星效果 */
+        .star {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            animation: gentleTwinkle 8s ease-in-out infinite;
+            color: #D1D5DB;
+        }
+        
+        .star-1 {
+            top: 25px;
+            left: 25%;
+            animation-delay: 1s;
+        }
+        
+        .star-2 {
+            top: 60px;
+            left: 70%;
+            animation-delay: 4s;
+        }
+        
+        .star-3 {
+            top: 90px;
+            left: 15%;
+            animation-delay: 7s;
+        }
+        
+        .star-4 {
+            top: 40px;
+            right: 20%;
+            animation-delay: 2.5s;
+        }
+        
+        @keyframes gentleTwinkle {
+            0%, 90%, 100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            45% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+        }
+        
+        /* 簡潔的浮動粒子 */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 50%;
+            opacity: 0;
+            animation: gentleParticleFloat 15s linear infinite;
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 30%; animation-delay: 3s; }
+        .particle:nth-child(3) { left: 50%; animation-delay: 6s; }
+        .particle:nth-child(4) { left: 70%; animation-delay: 9s; }
+        .particle:nth-child(5) { left: 90%; animation-delay: 12s; }
+        
+        @keyframes gentleParticleFloat {
+            0% {
+                bottom: -10px;
+                opacity: 0;
+                transform: translateX(0) scale(0);
+            }
+            20% {
+                opacity: 0.4;
+                transform: translateX(5px) scale(1);
+            }
+            80% {
+                opacity: 0.4;
+                transform: translateX(-5px) scale(1);
+            }
+            100% {
+                bottom: 150px;
+                opacity: 0;
+                transform: translateX(0) scale(0);
+            }
+        }
+        
+        /* 簡潔的進度條 */
+        .rainbow-progress {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg, #E4A9AF, #A9C7E4, #E4A9AF);
+            background-size: 200% 100%;
+            animation: gentleProgress 8s ease infinite;
+            border-radius: 3px;
+            margin-top: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        
+        .rainbow-progress::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            animation: gentleShimmer 4s linear infinite;
+        }
+        
+        @keyframes gentleProgress {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes gentleShimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        
+        /* 溫和的容器邊框效果 */
+        .verification-container::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, #E4A9AF, #A9C7E4, #E4A9AF);
+            background-size: 200% 200%;
+            border-radius: 25px;
+            z-index: -1;
+            animation: gentleBorderGlow 6s ease infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes gentleBorderGlow {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 載入中動畫 -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- 處理中提示訊息 - 調整為中慢板速度，簡潔顏色 -->
+    <div id="verificationOverlay" class="verification-overlay hidden">
+        <div class="verification-container">
+            <div class="verification-title">正在處理您的預約</div>
+            <div class="verification-message">請稍候，系統正在為您安排最棒的課程體驗...</div>
+            
+            <!-- 簡潔溫和的動畫場景 -->
+            <div class="character-container">
+                <!-- 簡潔的浮動粒子 -->
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                
+                <!-- 溫和的雲朵 -->
+                <div class="cloud cloud-1"></div>
+                <div class="cloud cloud-2"></div>
+                <div class="cloud cloud-3"></div>
+                
+                <!-- 簡潔的星星 -->
+                <svg class="star star-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star star-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star star-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                
+                <!-- 溫和的可愛角色 -->
+                <svg class="character" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <!-- 身體 -->
+                    <ellipse cx="256" cy="300" rx="120" ry="140" fill="#F3F4F6"/>
+                    <!-- 頭部 -->
+                    <circle cx="256" cy="180" r="100" fill="#F3F4F6"/>
+                    <!-- 耳朵 -->
+                    <ellipse cx="200" cy="120" rx="25" ry="40" fill="#E5E7EB" transform="rotate(-30 200 120)"/>
+                    <ellipse cx="312" cy="120" rx="25" ry="40" fill="#E5E7EB" transform="rotate(30 312 120)"/>
+                    <!-- 內耳 -->
+                    <ellipse cx="200" cy="120" rx="12" ry="20" fill="#D1D5DB" transform="rotate(-30 200 120)"/>
+                    <ellipse cx="312" cy="120" rx="12" ry="20" fill="#D1D5DB" transform="rotate(30 312 120)"/>
+                    <!-- 眼睛 -->
+                    <circle cx="220" cy="160" r="20" fill="white"/>
+                    <circle cx="292" cy="160" r="20" fill="white"/>
+                    <circle cx="220" cy="160" r="12" fill="#6B7280"/>
+                    <circle cx="292" cy="160" r="12" fill="#6B7280"/>
+                    <!-- 眼睛高光 -->
+                    <circle cx="225" cy="155" r="4" fill="white"/>
+                    <circle cx="297" cy="155" r="4" fill="white"/>
+                    <!-- 鼻子 -->
+                    <ellipse cx="256" cy="190" rx="8" ry="6" fill="#E4A9AF"/>
+                    <!-- 嘴巴 -->
+                    <path d="M240 210 Q256 225 272 210" fill="none" stroke="#E4A9AF" stroke-width="3" stroke-linecap="round"/>
+                    <!-- 腮紅 -->
+                    <circle cx="180" cy="180" r="15" fill="#E4A9AF" opacity="0.3"/>
+                    <circle cx="332" cy="180" r="15" fill="#E4A9AF" opacity="0.3"/>
+                    <!-- 手臂 -->
+                    <ellipse cx="150" cy="280" rx="30" ry="60" fill="#F3F4F6"/>
+                    <ellipse cx="362" cy="280" rx="30" ry="60" fill="#F3F4F6"/>
+                    <!-- 腳 -->
+                    <ellipse cx="220" cy="420" rx="35" ry="25" fill="#E5E7EB"/>
+                    <ellipse cx="292" cy="420" rx="35" ry="25" fill="#E5E7EB"/>
+                </svg>
+            </div>
+            
+            <!-- 簡潔的進度條 -->
+            <div class="rainbow-progress"></div>
+        </div>
+    </div>
+
+    <!-- 成功預約確認對話框 -->
+    <div id="successOverlay" class="success-overlay hidden">
+        <div class="success-dialog">
+            <div class="success-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+            
+            <h3 class="text-lg font-bold mb-2" style="color: #8B5A83;">預約成功！</h3>
+            <p class="text-gray-600 mb-3 text-sm" style="color: #A0729B;">恭喜您成功預約課程，以下是您的預約詳細資料：</p>
+            
+            <div class="booking-details">
+                <h4 class="text-base font-semibold mb-2">預約詳細資料</h4>
+                <div id="bookingDetailsContent">
+                    <!-- 預約詳細資料將在這裡動態填入 -->
+                </div>
+            </div>
+            
+            <p class="text-xs mb-3" style="color: #B8A0B5;">請確認以上資料無誤，並準時參加課程。</p>
+            
+            <button id="confirmSuccessBtn" class="confirm-btn">
+                確定
+            </button>
+        </div>
+    </div>
+
+    <!-- 頂部導航 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E4A9AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-800">課程預約系統</h1>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 優化後的分類篩選區塊 - 手機版本優化 -->
+        <div id="filterSection" class="filter-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-3">課程篩選</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 filter-grid">
+                <div class="filter-step">
+                    <label class="filter-label">課程內容</label>
+                    <select id="courseFilter" class="filter-select">
+                        <option value="">全部課程</option>
+                    </select>
+                </div>
+                <div class="filter-step">
+                    <label class="filter-label">日期</label>
+                    <select id="dateFilter" class="filter-select">
+                        <option value="">全部日期</option>
+                    </select>
+                </div>
+                <div class="filter-step">
+                    <label class="filter-label">時間</label>
+                    <select id="timeFilter" class="filter-select">
+                        <option value="">全部時間</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button id="clearFilterBtn" class="clear-filter-btn">
+                    清除篩選
+                </button>
+            </div>
+        </div>
+
+        <!-- 課程列表 -->
+        <div id="coursesSection" class="mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 relative overflow-hidden">
+                <!-- 動態背景元素 -->
+                <div class="animated-bg animated-bg-1"></div>
+                <div class="animated-bg animated-bg-2"></div>
+                <div class="animated-bg animated-bg-3"></div>
+                <div class="color-bar"></div>
+                
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 relative z-10">可預約課程</h2>
+                <div id="coursesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                    <div class="col-span-full text-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                        <p class="text-gray-500">正在載入課程資料...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 預約表單 -->
+        <div id="bookingForm" class="bg-white rounded-lg shadow-md p-6 mb-8 hidden relative overflow-hidden">
+            <!-- 動態背景元素 -->
+            <div class="animated-bg animated-bg-1"></div>
+            <div class="animated-bg animated-bg-2"></div>
+            <div class="color-bar"></div>
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 relative z-10">預約表單</h2>
+            <form id="reservationForm" class="relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="courseName">課程名稱</label>
+                        <input type="text" id="courseName" name="courseName" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                        <input type="hidden" id="courseId" name="courseId">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="teacher">教師姓名</label>
+                        <input type="text" id="teacher" name="teacher" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2 font-medium" for="classroom">教室</label>
+                        <input type="text" id="classroom" name="classroom" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                    </div>
+                    <div class="mb-4" id="dateSelectContainer">
+                        <label class="block text-gray-700 mb-2 font-medium" for="dateSelect">預約日期</label>
+                        <select id="dateSelect" name="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">請選擇日期</option>
+                        </select>
+                    </div>
+                    <div class="mb-4" id="timeSelectContainer">
+                        <label class="block text-gray-700 mb-2 font-medium" for="timeSelect">課程時間</label>
+                        <select id="timeSelect" name="time" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                            <option value="">請選擇時間</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 form-field">
+                        <label class="block text-gray-700 mb-2 font-medium" for="userName">姓名 *</label>
+                        <input type="text" id="userName" name="userName" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                        <div class="form-error" id="userNameError">請輸入姓名</div>
+                    </div>
+                    <div class="mb-4 form-field">
+                        <label class="block text-gray-700 mb-2 font-medium" for="userPhone">手機號碼 * (10碼)</label>
+                        <input type="tel" id="userPhone" name="userPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required placeholder="0912345678">
+                        <div class="form-error" id="userPhoneError">請輸入正確的10碼手機號碼</div>
+                    </div>
+                    <div class="mb-4 form-field md:col-span-2">
+                        <label class="block text-gray-700 mb-2 font-medium" for="userEmail">Email *</label>
+                        <input type="email" id="userEmail" name="userEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required placeholder="example@email.com">
+                        <div class="form-error" id="userEmailError">請輸入正確的Email格式</div>
+                    </div>
+                </div>
+                <div id="bookingMsg" class="my-4"></div>
+                <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+                    <button type="button" id="cancelBookingBtn" class="form-btn bg-gray-100 text-gray-700 hover:bg-gray-200">取消</button>
+                    <button type="submit" id="submitBtn" class="submit-btn form-btn bg-primary text-white hover:bg-primary-dark" disabled>提交預約</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 調試信息 -->
+        <div id="debugInfo" class="debug-info hidden"></div>
+        <div id="dataPreview" class="data-preview hidden"></div>
+    </div>
+
+    <script>
+        // 全局變數
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwIP3e16UFO1SKyWg4zAajnMelKFOr1a3BK_XzcMPY0Aj-LMrFeEcS0Bc6GSYXpe8qxQw/exec';
+        const sheetId = '10X8yQ1657B4hdYCDJaCxjjiBUXv5aOAToJV64MaIXOc';
+        let courses = [];
+        let currentCourse = null;
+        let courseSchedules = {};
+        let debugMode = false;
+        let lastRefreshTime = 0;
+        let currentBookingData = null;
+        const REFRESH_COOLDOWN = 1000;
+
+        // 篩選相關變數
+        let filterState = {
+            course: '',
+            date: '',
+            time: ''
+        };
+
+        // 記錄欄位是否已經被用戶互動過
+        let fieldTouched = {
+            userName: false,
+            userPhone: false,
+            userEmail: false
+        };
+
+        // 優化按鈕點擊處理 - 防止快速點擊和提供更好的反饋
+        function addButtonClickHandler(button, handler, options = {}) {
+            const { 
+                debounceTime = 300, 
+                preventDoubleClick = true,
+                addRippleEffect = true 
+            } = options;
+            
+            let isProcessing = false;
+            let timeoutId = null;
+            
+            // 添加波紋效果
+            if (addRippleEffect) {
+                button.style.position = 'relative';
+                button.style.overflow = 'hidden';
+            }
+            
+            function handleClick(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // 防止重複點擊
+                if (preventDoubleClick && isProcessing) {
+                    return;
+                }
+                
+                // 添加視覺反饋
+                button.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                }, 150);
+                
+                // 波紋效果
+                if (addRippleEffect) {
+                    createRippleEffect(e, button);
+                }
+                
+                // 防抖處理
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                
+                timeoutId = setTimeout(() => {
+                    isProcessing = true;
+                    
+                    try {
+                        const result = handler(e);
+                        
+                        // 如果返回 Promise，等待完成
+                        if (result && typeof result.then === 'function') {
+                            result.finally(() => {
+                                isProcessing = false;
+                            });
+                        } else {
+                            setTimeout(() => {
+                                isProcessing = false;
+                            }, debounceTime);
+                        }
+                    } catch (error) {
+                        console.error('Button click handler error:', error);
+                        isProcessing = false;
+                    }
+                }, debounceTime);
+            }
+            
+            // 添加多種事件監聽器以確保兼容性
+            button.addEventListener('click', handleClick);
+            button.addEventListener('touchend', handleClick);
+            
+            // 防止觸控設備的雙重觸發
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            });
+        }
+        
+        // 創建波紋效果
+        function createRippleEffect(event, element) {
+            const ripple = document.createElement('span');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+                z-index: 1;
+            `;
+            
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+        
+        // 添加 CSS 動畫
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 表單驗證函數
+        function validateName(name) {
+            return name && name.trim().length > 0;
+        }
+        
+        function validatePhone(phone) {
+            const phoneRegex = /^09\d{8}$/;
+            return phoneRegex.test(phone);
+        }
+        
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showFieldError(fieldId, errorId, isValid, showError = true) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(errorId);
+            
+            if (isValid) {
+                field.classList.remove('invalid');
+                field.classList.add('valid');
+                error.classList.remove('show');
+            } else if (showError && fieldTouched[fieldId]) {
+                field.classList.remove('valid');
+                field.classList.add('invalid');
+                error.classList.add('show');
+            } else {
+                field.classList.remove('valid', 'invalid');
+                error.classList.remove('show');
+            }
+        }
+        
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const value = field.value.trim();
+            let isValid = false;
+            
+            switch(fieldId) {
+                case 'userName':
+                    isValid = validateName(value);
+                    showFieldError('userName', 'userNameError', isValid);
+                    break;
+                case 'userPhone':
+                    isValid = validatePhone(value);
+                    showFieldError('userPhone', 'userPhoneError', isValid);
+                    break;
+                case 'userEmail':
+                    isValid = validateEmail(value);
+                    showFieldError('userEmail', 'userEmailError', isValid);
+                    break;
+            }
+            
+            return isValid;
+        }
+        
+        function validateForm() {
+            const userName = document.getElementById('userName').value.trim();
+            const userPhone = document.getElementById('userPhone').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+            const date = document.getElementById('dateSelect').value;
+            const time = document.getElementById('timeSelect').value;
+            
+            const nameValid = validateName(userName);
+            const phoneValid = validatePhone(userPhone);
+            const emailValid = validateEmail(userEmail);
+            
+            const allValid = nameValid && phoneValid && emailValid && date && time;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            if (allValid) {
+                submitBtn.classList.add('active');
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.classList.remove('active');
+                submitBtn.disabled = true;
+            }
+            
+            return allValid;
+        }
+
+        // 篩選功能
+        function initializeFilters() {
+    const courseFilter = document.getElementById('courseFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const timeFilter = document.getElementById('timeFilter');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+
+    // 獲取所有可用的選項
+    function getAllOptions() {
+        const allCourses = new Set();
+        const allDates = new Set();
+        const allTimes = new Set();
+        
+        Object.values(courseSchedules).forEach(course => {
+            const courseKey = `${course.name}-${course.teacher}`;
+            allCourses.add(courseKey);
+            
+            Object.keys(course.dates).forEach(date => {
+                allDates.add(date);
+                course.dates[date].forEach(session => {
+                    allTimes.add(session.time);
+                });
+            });
+        });
+        
+        return { allCourses, allDates, allTimes };
+    }
+
+    // 填充所有選項並根據其他選擇調整可用性
+    function updateFilterOptions() {
+        const { allCourses, allDates, allTimes } = getAllOptions();
+        
+        // 更新課程選項
+        const currentCourse = courseFilter.value;
+        courseFilter.innerHTML = '<option value="">全部課程</option>';
+        
+        Array.from(allCourses).forEach(courseKey => {
+            const course = courseSchedules[courseKey];
+            let isAvailable = true;
+            
+            // 檢查是否有符合已選日期和時間的課程
+            if (filterState.date || filterState.time) {
+                isAvailable = false;
+                Object.keys(course.dates).forEach(date => {
+                    if (!filterState.date || date === filterState.date) {
+                        course.dates[date].forEach(session => {
+                            if (!filterState.time || session.time === session.time) {
+                                if (session.booked < session.capacity) {
+                                    isAvailable = true;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            const option = document.createElement('option');
+            option.value = courseKey;
+            option.textContent = `${course.name} (${course.teacher})`;
+            option.disabled = !isAvailable;
+            courseFilter.appendChild(option);
+        });
+        
+        courseFilter.value = currentCourse;
+        
+        // 更新日期選項
+        const currentDate = dateFilter.value;
+        dateFilter.innerHTML = '<option value="">全部日期</option>';
+        
+        // 按日期排序
+        const sortedDates = Array.from(allDates).sort((a, b) => {
+            const dateA = parseChineseDate(a);
+            const dateB = parseChineseDate(b);
+            return dateA - dateB;
+        });
+        
+        sortedDates.forEach(date => {
+            let isAvailable = false;
+            let hasCapacity = false;
+            
+            Object.values(courseSchedules).forEach(course => {
+                const courseKey = `${course.name}-${course.teacher}`;
+                if (!filterState.course || courseKey === filterState.course) {
+                    if (course.dates[date]) {
+                        course.dates[date].forEach(session => {
+                            if (!filterState.time || session.time === session.time) {
+                                if (session.booked < session.capacity) {
+                                    isAvailable = true;
+                                    hasCapacity = true;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            
+            const option = document.createElement('option');
+            option.value = date;
+            option.textContent = `${date}${!hasCapacity ? ' (額滿)' : ''}`;
+            option.disabled = !isAvailable;
+            dateFilter.appendChild(option);
+        });
+        
+        dateFilter.value = currentDate;
+        
+        // 更新時間選項
+        const currentTime = timeFilter.value;
+        timeFilter.innerHTML = '<option value="">全部時間</option>';
+        
+        // 按時間排序
+        const sortedTimes = Array.from(allTimes).sort((a, b) => compareTimeStrings(a, b));
+        
+        sortedTimes.forEach(time => {
+            let isAvailable = false;
+            let totalCapacity = 0;
+            let totalBooked = 0;
+            
+            Object.values(courseSchedules).forEach(course => {
+                const courseKey = `${course.name}-${course.teacher}`;
+                if (!filterState.course || courseKey === filterState.course) {
+                    Object.keys(course.dates).forEach(date => {
+                        if (!filterState.date || date === filterState.date) {
+                            const session = course.dates[date].find(s => s.time === time);
+                            if (session) {
+                                totalCapacity += session.capacity;
+                                totalBooked += session.booked;
+                                if (session.booked < session.capacity) {
+                                    isAvailable = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = `${time}${totalCapacity > 0 ? ` (${totalBooked}/${totalCapacity})` : ''}${!isAvailable ? ' - 已額滿' : ''}`;
+            option.disabled = !isAvailable;
+            timeFilter.appendChild(option);
+        });
+        
+        timeFilter.value = currentTime;
+    }
+
+    // 動態篩選課程顯示
+    function filterCourses() {
+        const courseCards = document.querySelectorAll('.course-card');
+        let visibleCount = 0;
+        
+        courseCards.forEach(card => {
+            const courseKey = card.querySelector('.book-btn').dataset.courseKey;
+            const course = courseSchedules[courseKey];
+            let shouldShow = true;
+            
+            // 課程篩選
+            if (filterState.course && courseKey !== filterState.course) {
+                shouldShow = false;
+            }
+            
+            // 日期篩選
+            if (filterState.date && shouldShow) {
+                if (!course.dates[filterState.date]) {
+                    shouldShow = false;
+                } else {
+                    const dateCapacity = course.dates[filterState.date].reduce((sum, session) => sum + session.capacity, 0);
+                    const dateBooked = course.dates[filterState.date].reduce((sum, session) => sum + session.booked, 0);
+                    if (dateBooked >= dateCapacity) {
+                        shouldShow = false;
+                    }
+                }
+            }
+            
+            // 時間篩選
+            if (filterState.time && shouldShow) {
+                let hasAvailableTime = false;
+                
+                if (filterState.date) {
+                    if (course.dates[filterState.date]) {
+                        const timeSession = course.dates[filterState.date].find(session => session.time === filterState.time);
+                        if (timeSession && timeSession.booked < timeSession.capacity) {
+                            hasAvailableTime = true;
+                        }
+                    }
+                } else {
+                    Object.values(course.dates).forEach(dateSessions => {
+                        const timeSession = dateSessions.find(session => session.time === filterState.time);
+                        if (timeSession && timeSession.booked < timeSession.capacity) {
+                            hasAvailableTime = true;
+                        }
+                    });
+                }
+                
+                if (!hasAvailableTime) {
+                    shouldShow = false;
+                }
+            }
+            
+            if (shouldShow) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        
+        // 顯示無結果訊息
+        const coursesList = document.getElementById('coursesList');
+        let noResultsMsg = coursesList.querySelector('.no-results-message');
+        
+        if (visibleCount === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'col-span-full text-center py-8 no-results-message';
+                noResultsMsg.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p class="text-gray-500">沒有找到符合條件的課程</p>
+                    <p class="text-sm text-gray-400 mt-2">請調整篩選條件或清除篩選重新搜尋</p>
+                `;
+                coursesList.appendChild(noResultsMsg);
+            }
+        } else {
+            if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+        }
+    }
+
+    // 事件監聽器
+    courseFilter.addEventListener('change', function() {
+        filterState.course = this.value;
+        updateFilterOptions();
+        filterCourses();
+    });
+
+    dateFilter.addEventListener('change', function() {
+        filterState.date = this.value;
+        updateFilterOptions();
+        filterCourses();
+    });
+
+    timeFilter.addEventListener('change', function() {
+        filterState.time = this.value;
+        updateFilterOptions();
+        filterCourses();
+    });
+
+    // 清除篩選按鈕事件 - 使用優化的點擊處理
+    addButtonClickHandler(clearFilterBtn, function() {
+        // 重置篩選狀態
+        filterState = { course: '', date: '', time: '' };
+        
+        // 清除所有下拉選單的選擇值
+        courseFilter.value = '';
+        dateFilter.value = '';
+        timeFilter.value = '';
+        
+        // 重新初始化所有選項為預設狀態
+        courseFilter.innerHTML = '<option value="">全部課程</option>';
+        dateFilter.innerHTML = '<option value="">全部日期</option>';
+        timeFilter.innerHTML = '<option value="">全部時間</option>';
+        
+        // 重新填充選項
+        updateFilterOptions();
+        
+        // 顯示所有課程
+        const courseCards = document.querySelectorAll('.course-card');
+        courseCards.forEach(card => {
+            card.classList.remove('hidden');
+        });
+        
+        // 移除無結果訊息
+        const noResultsMsg = document.querySelector('.no-results-message');
+        if (noResultsMsg) {
+            noResultsMsg.remove();
+        }
+        
+        // 關閉預約表單
+        if (!document.getElementById('bookingForm').classList.contains('hidden')) {
+            returnToHome();
+        }
+    }, { debounceTime: 200 });
+
+    // 初始化選項
+    updateFilterOptions();
+}
+        // 顯示載入中
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        // 隱藏載入中
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 顯示處理中訊息
+        function showVerificationMessage(message = "請稍候，系統正在為您安排最棒的課程體驗...") {
+            const verificationMessage = document.querySelector('.verification-message');
+            verificationMessage.textContent = message;
+            document.getElementById('verificationOverlay').classList.remove('hidden');
+        }
+        
+        // 隱藏處理中訊息
+        function hideVerificationMessage() {
+            document.getElementById('verificationOverlay').classList.add('hidden');
+        }
+        
+        // 顯示成功預約確認對話框
+        function showSuccessDialog(bookingData) {
+            const detailsContent = document.getElementById('bookingDetailsContent');
+            
+            detailsContent.innerHTML = `
+<div class="mb-1">
+    <h5 class="font-semibold text-gray-700 mb-1 border-b pb-1 text-sm" style="color: #8B5A83;">課程資訊</h5>
+    <div class="flex flex-wrap gap-1 justify-start">
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">課程：</span>
+            <span class="booking-detail-value">${bookingData.courseName}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">教師：</span>
+            <span class="booking-detail-value">${bookingData.teacher}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">教室：</span>
+            <span class="booking-detail-value">${bookingData.classroom}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">日期：</span>
+            <span class="booking-detail-value">${bookingData.date}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">時間：</span>
+            <span class="booking-detail-value">${bookingData.time}</span>
+        </div>
+    </div>
+</div>
+<div>
+    <h5 class="font-semibold text-gray-700 mb-1 border-b pb-1 text-sm" style="color: #8B5A83;">預約人資訊</h5>
+    <div class="flex flex-wrap gap-1 justify-start">
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">姓名：</span>
+            <span class="booking-detail-value">${bookingData.userName}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">手機：</span>
+            <span class="booking-detail-value">${bookingData.userPhone}</span>
+        </div>
+        <div class="booking-detail-item">
+            <span class="booking-detail-label">Email：</span>
+            <span class="booking-detail-value">${bookingData.userEmail}</span>
+        </div>
+    </div>
+</div>
+`;
+            
+            document.getElementById('successOverlay').classList.remove('hidden');
+        }
+        
+        // 隱藏成功預約確認對話框
+        function hideSuccessDialog() {
+            document.getElementById('successOverlay').classList.add('hidden');
+        }
+        
+        // 調試日誌
+        function debugLog(message, data = null) {
+            if (debugMode) {
+                console.log(message, data);
+                const debugInfo = document.getElementById('debugInfo');
+                debugInfo.classList.remove('hidden');
+                debugInfo.textContent = message + (data ? ': ' + JSON.stringify(data).substring(0, 100) + '...' : '');
+            }
+        }
+        
+        // 顯示數據預覽
+        function showDataPreview(data) {
+            if (debugMode && data && data.length > 0) {
+                const dataPreview = document.getElementById('dataPreview');
+                dataPreview.classList.remove('hidden');
+                
+                let html = '<h3>OpenSheet 數據預覽</h3><table border="1" style="border-collapse: collapse;">';
+                
+                // 表頭
+                html += '<tr>';
+                for (const key in data[0]) {
+                    html += `<th style="padding: 5px; background: #f0f0f0;">${key}</th>`;
+                }
+                html += '</tr>';
+                
+                // 數據行 (最多顯示3行)
+                const maxRows = Math.min(data.length, 3);
+                for (let i = 0; i < maxRows; i++) {
+                    html += '<tr>';
+                    for (const key in data[0]) {
+                        html += `<td style="padding: 5px;">${data[i][key] || ''}</td>`;
+                    }
+                    html += '</tr>';
+                }
+                
+                html += '</table>';
+                html += `<p style="margin-top: 10px;">總共 ${data.length} 筆資料</p>`;
+                dataPreview.innerHTML = html;
+            }
+        }
+
+        // 使用 OpenSheet 格式讀取課程數據
+        function fetchCourses(showLoadingIndicator = true, silentMode = false) {
+            const now = Date.now();
+            if (now - lastRefreshTime < REFRESH_COOLDOWN) {
+                debugLog('刷新過於頻繁，跳過此次刷新');
+                return Promise.resolve();
+            }
+            
+            lastRefreshTime = now;
+            
+            if (!silentMode && showLoadingIndicator) {
+                showLoading();
+            }
+            
+            debugLog('開始讀取課程數據 - OpenSheet API', silentMode ? '(靜默模式)' : '');
+            
+            const openSheetUrl = `https://opensheet.elk.sh/${sheetId}/課程`;
+            
+            return fetch(openSheetUrl)
+                .then(response => {
+                    debugLog('OpenSheet API 回應狀態', response.status);
+                    if (!response.ok) {
+                        throw new Error(`OpenSheet API 錯誤: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    debugLog('OpenSheet 原始數據', data);
+                    
+                    if (debugMode) {
+                        if (data && data.length > 0) {
+                            console.log('OpenSheet 欄位名稱:', Object.keys(data[0]));
+                            showDataPreview(data);
+                        }
+                    }
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        const parsedCourses = data.map((row, index) => {
+                            if (debugMode) {
+                                console.log(`第 ${index + 1} 行數據:`, row);
+                            }
+                            
+                            let bookedCount = 0;
+                            const bookedField = row['已預約人數'] || row['已預約'] || row['booked'] || '0';
+                            bookedCount = parseInt(bookedField) || 0;
+                            
+                            let capacity = 0;
+                            const capacityField = row['容量'] || row['capacity'] || row['人數上限'] || '0';
+                            capacity = parseInt(capacityField) || 0;
+                            
+                            return {
+                                id: index + 1,
+                                name: row['課程名稱'] || row['name'] || '',
+                                teacher: row['教師姓名'] || row['teacher'] || row['講師'] || '',
+                                classroom: row['教室'] || row['classroom'] || row['地點'] || '',
+                                date: row['日期'] || row['date'] || '',
+                                time: row['時間'] || row['time'] || '',
+                                capacity: capacity,
+                                booked: bookedCount
+                            };
+                        });
+                        
+                        debugLog('解析後的課程數據', parsedCourses);
+                        
+                        courses = parsedCourses.filter(course => 
+                            course.name && course.name.trim() !== '' &&
+                            course.teacher && course.teacher.trim() !== ''
+                        );
+                        
+                        debugLog('過濾後的有效課程數據', courses);
+                        
+                        if (courses.length > 0) {
+                            organizeCoursesSchedule();
+                            renderCourses();
+                            // 更新篩選選項
+                            if (typeof initializeFilters === 'function') {
+                                initializeFilters();
+                            }
+                        } else {
+                            throw new Error('沒有找到有效的課程數據');
+                        }
+                    } else {
+                        throw new Error('OpenSheet 回傳的數據格式不正確或為空');
+                    }
+                })
+                .catch(error => {
+                    if (!silentMode) {
+                        console.error('獲取課程數據失敗:', error);
+                        debugLog('獲取課程數據失敗', error);
+                        document.getElementById('coursesList').innerHTML = `
+                            <div class="col-span-full text-center py-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <p class="text-gray-500">載入課程資料失敗</p>
+                                <p class="text-sm text-gray-400 mt-2">錯誤: ${error.message}</p>
+                                <p class="text-sm text-gray-400">請檢查 OpenSheet 設定是否正確</p>
+                            </div>
+                        `;
+                    } else {
+                        debugLog('靜默模式下獲取課程數據失敗', error);
+                    }
+                })
+                .finally(() => {
+                    if (!silentMode && showLoadingIndicator) {
+                        hideLoading();
+                    }
+                });
+        }
+        
+        // 組織相同課程名稱和教師的課程
+        function organizeCoursesSchedule() {
+            courseSchedules = {};
+            
+            courses.forEach(course => {
+                const key = `${course.name}-${course.teacher}`;
+                
+                if (!courseSchedules[key]) {
+                    courseSchedules[key] = {
+                        id: course.id,
+                        name: course.name,
+                        teacher: course.teacher,
+                        classroom: course.classroom,
+                        dates: {},
+                        capacity: 0,
+                        booked: 0,
+                        availableDates: [],
+                        fullyBookedDates: []
+                    };
+                }
+                
+                if (!courseSchedules[key].dates[course.date]) {
+                    courseSchedules[key].dates[course.date] = [];
+                }
+                
+                courseSchedules[key].dates[course.date].push({
+                    time: course.time,
+                    id: course.id,
+                    capacity: course.capacity,
+                    booked: course.booked
+                });
+                
+                courseSchedules[key].capacity += course.capacity;
+                courseSchedules[key].booked += course.booked;
+            });
+            
+            // 計算每個課程的可用和額滿日期
+            Object.values(courseSchedules).forEach(course => {
+                Object.keys(course.dates).forEach(date => {
+                    const dateCapacity = course.dates[date].reduce((sum, session) => sum + session.capacity, 0);
+                    const dateBooked = course.dates[date].reduce((sum, session) => sum + session.booked, 0);
+                    
+                    if (dateBooked >= dateCapacity) {
+                        course.fullyBookedDates.push(date);
+                    } else {
+                        course.availableDates.push(date);
+                    }
+                });
+            });
+            
+            debugLog('組織後的課程數據', courseSchedules);
+        }
+
+        // 渲染課程列表
+        function renderCourses() {
+            const container = document.getElementById('coursesList');
+            container.innerHTML = '';
+            
+            if (Object.keys(courseSchedules).length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        </svg>
+                        <p class="text-gray-500">目前沒有可預約的課程</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            Object.values(courseSchedules).forEach(course => {
+                const isDisabled = course.booked >= course.capacity;
+                const card = document.createElement('div');
+                card.className = `course-card bg-white border border-gray-200 rounded-lg overflow-hidden ${isDisabled ? 'disabled' : 'shimmer'}`;
+                
+                const statusColor = isDisabled ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600';
+                const randomColor = ['bg-primary-light', 'bg-secondary-light', 'bg-accent-light'][Math.floor(Math.random() * 3)];
+                
+                // 顯示課程日期和額滿狀態 - 改進排版
+                const sortedDates = Object.keys(course.dates).sort((a, b) => {
+                    const dateA = parseChineseDate(a);
+                    const dateB = parseChineseDate(b);
+                    return dateA - dateB;
+                });
+                
+                let datesDisplay = '';
+                if (sortedDates.length > 0) {
+                    const displayDates = sortedDates.slice(0, 4); // 最多顯示4個日期
+                    datesDisplay = displayDates.map(date => {
+                        const dateCapacity = course.dates[date].reduce((sum, session) => sum + session.capacity, 0);
+                        const dateBooked = course.dates[date].reduce((sum, session) => sum + session.booked, 0);
+                        const isDateFull = dateBooked >= dateCapacity;
+                        return `<span class="date-item${isDateFull ? ' full' : ''}">${date}</span>`;
+                    }).join('');
+                    
+                    if (sortedDates.length > 4) {
+                        datesDisplay += '<span class="date-item">...</span>';
+                    }
+                }
+                
+                card.innerHTML = `
+                    <div class="p-6 relative flex flex-col h-full">
+                        <div class="absolute top-0 left-0 w-full h-1 ${randomColor}"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">${course.name}</h3>
+                            <span class="${statusColor} text-xs font-medium px-2.5 py-1 rounded-full">
+                                ${isDisabled ? '已額滿' : '可預約'}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-gray-600 text-sm">教師姓名：${course.teacher}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-gray-600 text-sm">教室：${course.classroom}</span>
+                        </div>
+                        <div class="course-dates-section">
+                            <div class="course-dates-title">課程日期：</div>
+                            <div class="course-dates-content">${datesDisplay || '<span class="text-gray-400">無</span>'}</div>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-600 text-sm">可預約人數</span>
+                            <span class="font-medium">${course.capacity}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-600 text-sm">已預約</span>
+                            <span class="font-medium">${course.booked}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.min((course.booked / course.capacity) * 100, 100)}%"></div>
+                        </div>
+                        <button class="book-btn ${isDisabled ? 'bg-gray-100 text-gray-400' : 'bg-primary text-white hover:bg-primary-dark pulse'}" 
+                            ${isDisabled ? 'disabled' : ''} data-course-key="${course.name}-${course.teacher}">
+                            ${isDisabled ? '已額滿' : '立即預約'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+                
+                if (!isDisabled) {
+                    const bookBtn = card.querySelector('.book-btn');
+                    addButtonClickHandler(bookBtn, function(e) {
+                        debugLog('立即預約按鈕被點擊', course.name);
+                        showBookingForm(course);
+                    }, { debounceTime: 200 });
+                }
+            });
+        }
+
+        // 顯示預約表單 - 支援預填資料和篩選器模式
+        function showBookingForm(course, preSelectedDate = null, preSelectedTime = null, fromFilter = false) {
+            currentCourse = course;
+            
+            document.getElementById('coursesSection').classList.add('hidden');
+            document.getElementById('bookingForm').classList.remove('hidden');
+            
+            document.getElementById('courseName').value = course.name;
+            document.getElementById('teacher').value = course.teacher;
+            document.getElementById('classroom').value = course.classroom;
+            
+            const dateSelectContainer = document.getElementById('dateSelectContainer');
+            const timeSelectContainer = document.getElementById('timeSelectContainer');
+            const dateSelect = document.getElementById('dateSelect');
+            const timeSelect = document.getElementById('timeSelect');
+            
+            if (fromFilter && preSelectedDate && preSelectedTime) {
+                // 來自篩選器且有完整選擇，隱藏日期和時間選擇器，直接設定值
+                dateSelectContainer.style.display = 'none';
+                timeSelectContainer.style.display = 'none';
+                
+                // 創建隱藏的輸入欄位來存儲值
+                dateSelect.value = preSelectedDate;
+                timeSelect.value = preSelectedTime;
+                
+                // 設定對應的課程ID
+                const selectedSession = course.dates[preSelectedDate].find(s => s.time === preSelectedTime);
+                if (selectedSession) {
+                    document.getElementById('courseId').value = selectedSession.id;
+                }
+                
+                // 顯示選擇的資訊
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'mb-4 md:col-span-2';
+                infoDiv.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-medium text-blue-800 mb-2">已選擇的課程時段：</h4>
+                        <p class="text-blue-700"><strong>日期：</strong>${preSelectedDate}</p>
+                        <p class="text-blue-700"><strong>時間：</strong>${preSelectedTime}</p>
+                    </div>
+                `;
+                
+                // 插入到教室欄位後面
+                const classroomContainer = document.querySelector('#classroom').parentElement;
+                classroomContainer.parentElement.insertBefore(infoDiv, classroomContainer.nextSibling);
+                
+            } else {
+                // 正常模式，顯示選擇器
+                dateSelectContainer.style.display = 'block';
+                timeSelectContainer.style.display = 'block';
+                
+                // 移除可能存在的資訊顯示
+                const existingInfo = document.querySelector('.bg-blue-50');
+                if (existingInfo) {
+                    existingInfo.parentElement.remove();
+                }
+                
+                // 填充日期下拉選單，顯示額滿狀態
+                dateSelect.innerHTML = '<option value="">請選擇日期</option>';
+                
+                const sortedDates = Object.keys(course.dates).sort((a, b) => {
+                    const dateA = parseChineseDate(a);
+                    const dateB = parseChineseDate(b);
+                    return dateA - dateB;
+                });
+                
+                sortedDates.forEach(date => {
+                    const dateCapacity = course.dates[date].reduce((sum, session) => sum + session.capacity, 0);
+                    const dateBooked = course.dates[date].reduce((sum, session) => sum + session.booked, 0);
+                    const isDateFull = dateBooked >= dateCapacity;
+                    
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = `${date}${isDateFull ? ' (額滿)' : ''}`;
+                    
+                    if (isDateFull) {
+                        option.disabled = true;
+                    }
+                    
+                    dateSelect.appendChild(option);
+                });
+                
+                // 清空時間下拉選單
+                timeSelect.innerHTML = '<option value="">請選擇時間</option>';
+                timeSelect.disabled = true;
+                
+                // 重新設置事件監聽器
+                setupFormEventListeners(course);
+                
+                // 如果有預選日期，設定它
+                if (preSelectedDate) {
+                    dateSelect.value = preSelectedDate;
+                    // 觸發日期變更事件來填充時間選項
+                    const dateEvent = new Event('change');
+                    dateSelect.dispatchEvent(dateEvent);
+                    
+                    // 等待時間選項填充後設定預選時間
+                    setTimeout(() => {
+                        if (preSelectedTime) {
+                            timeSelect.value = preSelectedTime;
+                            const timeEvent = new Event('change');
+                            timeSelect.dispatchEvent(timeEvent);
+                        }
+                    }, 100);
+                }
+            }
+            
+            // 清空其他表單字段
+            document.getElementById('userName').value = '';
+            document.getElementById('userPhone').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('bookingMsg').innerHTML = '';
+            
+            // 重置表單驗證狀態和觸碰記錄
+            fieldTouched = {
+                userName: false,
+                userPhone: false,
+                userEmail: false
+            };
+            
+            ['userName', 'userPhone', 'userEmail'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.classList.remove('valid', 'invalid');
+                const errorId = fieldId + 'Error';
+                const error = document.getElementById(errorId);
+                if (error) {
+                    error.classList.remove('show');
+                }
+            });
+            
+            validateForm();
+        }
+        
+        // 設置表單事件監聽器
+        function setupFormEventListeners(course) {
+            const dateSelect = document.getElementById('dateSelect');
+            const timeSelect = document.getElementById('timeSelect');
+            
+            // 移除舊的事件監聽器
+            const newDateSelect = dateSelect.cloneNode(true);
+            dateSelect.parentNode.replaceChild(newDateSelect, dateSelect);
+            
+            const newTimeSelect = timeSelect.cloneNode(true);
+            timeSelect.parentNode.replaceChild(newTimeSelect, timeSelect);
+            
+            // 重新獲取元素並添加事件監聽器
+            const updatedDateSelect = document.getElementById('dateSelect');
+            const updatedTimeSelect = document.getElementById('timeSelect');
+            
+            updatedDateSelect.addEventListener('change', function() {
+                const selectedDate = this.value;
+                updatedTimeSelect.innerHTML = '<option value="">請選擇時間</option>';
+                
+                if (selectedDate) {
+                    updatedTimeSelect.disabled = false;
+                    
+                    const times = course.dates[selectedDate].map(session => ({
+                        time: session.time,
+                        id: session.id,
+                        capacity: session.capacity,
+                        booked: session.booked,
+                        isAvailable: session.booked < session.capacity
+                    }));
+                    
+                    times.sort((a, b) => compareTimeStrings(a.time, b.time));
+                    
+                    times.forEach(session => {
+                        const option = document.createElement('option');
+                        option.value = session.time;
+                        option.textContent = `${session.time} (${session.booked}/${session.capacity})`;
+                        option.dataset.id = session.id;
+                        
+                        if (!session.isAvailable) {
+                            option.disabled = true;
+                            option.textContent += ' - 已額滿';
+                        }
+                        
+                        updatedTimeSelect.appendChild(option);
+                    });
+                } else {
+                    updatedTimeSelect.disabled = true;
+                }
+                
+                validateForm();
+            });
+            
+            updatedTimeSelect.addEventListener('change', function() {
+                const selectedDate = updatedDateSelect.value;
+                const selectedTime = this.value;
+                
+                if (selectedDate && selectedTime) {
+                    const selectedSession = course.dates[selectedDate].find(s => s.time === selectedTime);
+                    if (selectedSession) {
+                        document.getElementById('courseId').value = selectedSession.id;
+                    }
+                }
+                
+                validateForm();
+            });
+            
+            // 添加表單驗證事件監聽器 - 使用 blur 事件而不是 input 事件
+            ['userName', 'userPhone', 'userEmail'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                
+                // 當欄位獲得焦點時，標記為已觸碰
+                field.addEventListener('focus', function() {
+                    fieldTouched[fieldId] = true;
+                });
+                
+                // 當欄位失去焦點時，進行驗證並顯示錯誤（如果有的話）
+                field.addEventListener('blur', function() {
+                    if (fieldTouched[fieldId]) {
+                        validateField(fieldId);
+                    }
+                });
+                
+                // 輸入時只更新提交按鈕狀態，不顯示錯誤
+                field.addEventListener('input', function() {
+                    validateForm();
+                });
+            });
+        }
+        
+        // 解析中文日期格式
+        function parseChineseDate(dateStr) {
+            try {
+                const yearMatch = dateStr.match(/(\d+)年/);
+                const monthMatch = dateStr.match(/(\d+)月/);
+                const dayMatch = dateStr.match(/(\d+)日/);
+                
+                if (yearMatch && monthMatch && dayMatch) {
+                    const year = parseInt(yearMatch[1]);
+                    const month = parseInt(monthMatch[1]) - 1;
+                    const day = parseInt(dayMatch[1]);
+                    return new Date(year, month, day);
+                }
+                
+                return new Date(NaN);
+            } catch (e) {
+                console.error('解析日期失敗:', dateStr, e);
+                return new Date(NaN);
+            }
+        }
+        
+        // 比較時間字符串
+        function compareTimeStrings(timeA, timeB) {
+            try {
+                const startTimeA = timeA.split('-')[0].trim();
+                const startTimeB = timeB.split('-')[0].trim();
+                
+                const [hoursA, minutesA] = startTimeA.split(':').map(Number);
+                const [hoursB, minutesB] = startTimeB.split(':').map(Number);
+                
+                if (hoursA !== hoursB) {
+                    return hoursA - hoursB;
+                }
+                
+                return minutesA - minutesB;
+            } catch (e) {
+                console.error('比較時間失敗:', timeA, timeB, e);
+                return 0;
+            }
+        }
+        
+        // 提交預約資料
+        async function submitReservation(formData) {
+            debugLog('提交預約資料', formData);
+            
+            try {
+                showVerificationMessage("請稍候，系統正在為您安排最棒的課程體驗...");
+                
+                const response = await fetch(scriptURL, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`提交失敗: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                debugLog('預約提交結果', result);
+                
+                return result;
+            } catch (error) {
+                console.error('提交預約資料失敗:', error);
+                debugLog('提交預約資料失敗', error);
+                throw error;
+            }
+        }
+        
+        // 返回首頁（不顯示載入中）
+        function returnToHome() {
+            document.getElementById('bookingForm').classList.add('hidden');
+            document.getElementById('coursesSection').classList.remove('hidden');
+            
+            // 恢復日期和時間選擇器的顯示
+            document.getElementById('dateSelectContainer').style.display = 'block';
+            document.getElementById('timeSelectContainer').style.display = 'block';
+            
+            // 移除可能存在的資訊顯示
+            const existingInfo = document.querySelector('.bg-blue-50');
+            if (existingInfo) {
+                existingInfo.parentElement.remove();
+            }
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查調試模式
+            const urlParams = new URLSearchParams(window.location.search);
+            debugMode = urlParams.has('debug');
+            
+            if (debugMode) {
+                document.getElementById('debugInfo').classList.remove('hidden');
+                document.getElementById('dataPreview').classList.remove('hidden');
+                console.log('調試模式已啟用');
+            }
+            
+            // 載入課程數據
+            fetchCourses().then(() => {
+                // 初始化篩選功能
+                initializeFilters();
+            });
+            
+            // 取消預約表單 - 使用優化的點擊處理
+            const cancelBookingBtn = document.getElementById('cancelBookingBtn');
+            addButtonClickHandler(cancelBookingBtn, function() {
+                returnToHome();
+            }, { debounceTime: 200 });
+            
+            // 成功確認按鈕 - 使用優化的點擊處理
+            const confirmSuccessBtn = document.getElementById('confirmSuccessBtn');
+            addButtonClickHandler(confirmSuccessBtn, function() {
+                hideSuccessDialog();
+                returnToHome();
+            }, { debounceTime: 200 });
+            
+            // 預約表單提交 - 使用優化的點擊處理
+            const reservationForm = document.getElementById('reservationForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            addButtonClickHandler(submitBtn, async function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    document.getElementById('bookingMsg').innerHTML = '<span class="error">請填寫所有必填欄位並確保格式正確</span>';
+                    return;
+                }
+                
+                showLoading();
+                submitBtn.disabled = true;
+                document.getElementById('bookingMsg').innerHTML = '';
+                
+                try {
+                    const formData = new FormData(reservationForm);
+                    
+                    // 儲存預約資料用於確認對話框
+                    currentBookingData = {
+                        courseName: formData.get('courseName'),
+                        teacher: formData.get('teacher'),
+                        classroom: formData.get('classroom'),
+                        date: formData.get('date'),
+                        time: formData.get('time'),
+                        userName: formData.get('userName'),
+                        userPhone: formData.get('userPhone'),
+                        userEmail: formData.get('userEmail')
+                    };
+                    
+                    showVerificationMessage("請稍候，系統正在為您安排最棒的課程體驗...");
+                    
+                    const result = await submitReservation(formData);
+                    
+                    hideVerificationMessage();
+                    
+                    if (result.success) {
+                        // 顯示成功確認對話框
+                        showSuccessDialog(currentBookingData);
+                    } else {
+                        document.getElementById('bookingMsg').innerHTML = `<span class="error">${result.message || '預約失敗，請稍後再試。'}</span>`;
+                    }
+                    
+                } catch (error) {
+                    console.error('預約過程中發生錯誤:', error);
+                    debugLog('預約過程中發生錯誤', error);
+                    document.getElementById('bookingMsg').innerHTML = `<span class="error">預約失敗：${error.message}</span>`;
+                    hideVerificationMessage();
+                } finally {
+                    hideLoading();
+                    submitBtn.disabled = false;
+                }
+            }, { 
+                debounceTime: 500, 
+                preventDoubleClick: true 
+            });
+        });
+    </script>
+</body>
+</html>
