@@ -352,47 +352,84 @@
             overflow: auto;
         }
         
-        /* 新的全頁面提示訊息樣式 */
+        /* 調整後的等待動畫 - 中慢板速度，簡潔顏色 */
         .verification-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.85);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(8px);
+            animation: overlayFadeIn 0.8s ease-out;
+        }
+        
+        @keyframes overlayFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(8px);
+            }
         }
         
         .verification-container {
-            background-color: #FFF3E0;
-            border-radius: 16px;
-            padding: 24px;
+            background: linear-gradient(135deg, #FEFEFE, #F8F9FA);
+            border-radius: 24px;
+            padding: 32px;
             max-width: 90%;
-            width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 420px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(228, 169, 175, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
             text-align: center;
             position: relative;
             overflow: hidden;
-            border: 2px solid #FFD8A8;
+            animation: containerSlideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        @keyframes containerSlideIn {
+            from {
+                transform: translateY(20px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
         }
         
         .verification-title {
             font-weight: 700;
-            font-size: 1.3rem;
-            color: #B45309;
-            margin-bottom: 16px;
+            font-size: 1.4rem;
+            color: #6B7280;
+            margin-bottom: 12px;
             text-align: center;
+            animation: titleGlow 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                color: #6B7280;
+            }
+            to {
+                color: #E4A9AF;
+            }
         }
         
         .verification-message {
             font-size: 1rem;
-            color: #92400E;
-            margin-bottom: 20px;
+            color: #9CA3AF;
+            margin-bottom: 24px;
+            opacity: 0.9;
         }
         
         /* 成功確認對話框樣式 - 優化尺寸和字體 */
@@ -549,164 +586,301 @@
             box-shadow: none;
         }
         
-        /* 可愛的動畫角色 */
+        /* 簡潔溫和的動畫場景 */
         .character-container {
             position: relative;
-            height: 120px;
+            height: 140px;
             width: 100%;
-            margin: 20px 0;
+            margin: 24px 0;
             overflow: hidden;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #F8F9FA, #F1F5F9);
+            animation: gentleGradient 12s ease infinite;
         }
         
-        /* 可愛的雲朵 */
+        @keyframes gentleGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* 溫和的雲朵設計 */
         .cloud {
             position: absolute;
-            background-color: white;
-            border-radius: 50%;
-            opacity: 0.9;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            border-radius: 50px;
+            opacity: 0.8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            animation: gentleFloat 16s ease-in-out infinite;
+        }
+        
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50px;
         }
         
         .cloud-1 {
-            width: 60px;
-            height: 60px;
-            top: 10px;
+            width: 70px;
+            height: 50px;
+            top: 15px;
             left: 20px;
+            animation-delay: 0s;
+        }
+        
+        .cloud-1::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+        
+        .cloud-1::after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
         }
         
         .cloud-2 {
-            width: 80px;
-            height: 80px;
-            top: 5px;
-            left: 60px;
+            width: 90px;
+            height: 60px;
+            top: 10px;
+            right: 30px;
+            animation-delay: 5s;
+        }
+        
+        .cloud-2::before {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 15px;
+        }
+        
+        .cloud-2::after {
+            width: 70px;
+            height: 50px;
+            top: -20px;
+            right: 15px;
         }
         
         .cloud-3 {
-            width: 70px;
-            height: 70px;
-            top: 15px;
-            left: 120px;
+            width: 80px;
+            height: 55px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 10s;
         }
         
-        /* 可愛的小動物動畫 */
+        .cloud-3::before {
+            width: 55px;
+            height: 55px;
+            top: -25px;
+            left: 12px;
+        }
+        
+        .cloud-3::after {
+            width: 65px;
+            height: 45px;
+            top: -18px;
+            right: 12px;
+        }
+        
+        @keyframes gentleFloat {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            33% {
+                transform: translateY(-5px) translateX(3px);
+            }
+            66% {
+                transform: translateY(-3px) translateX(-2px);
+            }
+        }
+        
+        /* 溫和的小動物角色 */
         .character {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            bottom: 10px;
-            left: -60px;
-            animation: character-move 4s linear infinite;
+            width: 80px;
+            height: 80px;
+            bottom: 15px;
+            left: -80px;
+            animation: gentleJourney 20s linear infinite;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
         }
         
-        @keyframes character-move {
+        @keyframes gentleJourney {
             0% {
-                left: -60px;
-                transform: translateY(0) rotate(0deg);
+                left: -80px;
+                transform: translateY(0) rotate(0deg) scale(1);
             }
-            10% {
-                transform: translateY(-15px) rotate(5deg);
-            }
-            20% {
-                transform: translateY(0) rotate(0deg);
+            15% {
+                transform: translateY(-8px) rotate(3deg) scale(1.02);
             }
             30% {
-                transform: translateY(-15px) rotate(-5deg);
+                transform: translateY(-2px) rotate(-2deg) scale(0.98);
             }
-            40% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-10px) rotate(5deg);
+            45% {
+                transform: translateY(-10px) rotate(4deg) scale(1.03);
             }
             60% {
-                transform: translateY(0) rotate(0deg);
+                transform: translateY(-4px) rotate(-3deg) scale(0.97);
             }
-            70% {
-                transform: translateY(-10px) rotate(-5deg);
+            75% {
+                transform: translateY(-6px) rotate(2deg) scale(1.01);
             }
-            80% {
-                transform: translateY(0) rotate(0deg);
+            90% {
+                transform: translateY(-3px) rotate(-1deg) scale(0.99);
             }
             100% {
-                left: calc(100% + 60px);
-                transform: translateY(0) rotate(0deg);
+                left: calc(100% + 80px);
+                transform: translateY(0) rotate(0deg) scale(1);
             }
         }
         
-        /* 星星閃爍動畫 */
+        /* 簡潔的星星效果 */
         .star {
             position: absolute;
             width: 20px;
             height: 20px;
             opacity: 0;
-            animation: star-twinkle 3s ease-in-out infinite;
+            animation: gentleTwinkle 8s ease-in-out infinite;
+            color: #D1D5DB;
         }
         
         .star-1 {
-            top: 20px;
-            left: 30%;
-            animation-delay: 0.5s;
+            top: 25px;
+            left: 25%;
+            animation-delay: 1s;
         }
         
         .star-2 {
-            top: 50px;
-            left: 60%;
-            animation-delay: 1.5s;
+            top: 60px;
+            left: 70%;
+            animation-delay: 4s;
         }
         
         .star-3 {
-            top: 80px;
-            left: 20%;
+            top: 90px;
+            left: 15%;
+            animation-delay: 7s;
+        }
+        
+        .star-4 {
+            top: 40px;
+            right: 20%;
             animation-delay: 2.5s;
         }
         
-        @keyframes star-twinkle {
-            0% {
+        @keyframes gentleTwinkle {
+            0%, 90%, 100% {
                 transform: scale(0);
                 opacity: 0;
             }
-            50% {
+            45% {
                 transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
+                opacity: 0.6;
             }
         }
         
-        /* 彩虹進度條 */
+        /* 簡潔的浮動粒子 */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 50%;
+            opacity: 0;
+            animation: gentleParticleFloat 15s linear infinite;
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 30%; animation-delay: 3s; }
+        .particle:nth-child(3) { left: 50%; animation-delay: 6s; }
+        .particle:nth-child(4) { left: 70%; animation-delay: 9s; }
+        .particle:nth-child(5) { left: 90%; animation-delay: 12s; }
+        
+        @keyframes gentleParticleFloat {
+            0% {
+                bottom: -10px;
+                opacity: 0;
+                transform: translateX(0) scale(0);
+            }
+            20% {
+                opacity: 0.4;
+                transform: translateX(5px) scale(1);
+            }
+            80% {
+                opacity: 0.4;
+                transform: translateX(-5px) scale(1);
+            }
+            100% {
+                bottom: 150px;
+                opacity: 0;
+                transform: translateX(0) scale(0);
+            }
+        }
+        
+        /* 簡潔的進度條 */
         .rainbow-progress {
             height: 6px;
             width: 100%;
-            background: linear-gradient(90deg, #FF9AA2, #FFB7B2, #FFDAC1, #E2F0CB, #B5EAD7, #C7CEEA);
-            background-size: 600% 600%;
-            animation: rainbow-move 3s linear infinite;
+            background: linear-gradient(90deg, #E4A9AF, #A9C7E4, #E4A9AF);
+            background-size: 200% 100%;
+            animation: gentleProgress 8s ease infinite;
             border-radius: 3px;
-            margin-top: 20px;
+            margin-top: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         
-        .rainbow-progress::after {
+        .rainbow-progress::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 50%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.4);
-            animation: rainbow-shine 2s linear infinite;
+            background: rgba(255,255,255,0.3);
+            animation: gentleShimmer 4s linear infinite;
         }
         
-        @keyframes rainbow-move {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+        @keyframes gentleProgress {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         
-        @keyframes rainbow-shine {
+        @keyframes gentleShimmer {
             0% { left: -100%; }
             100% { left: 200%; }
+        }
+        
+        /* 溫和的容器邊框效果 */
+        .verification-container::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, #E4A9AF, #A9C7E4, #E4A9AF);
+            background-size: 200% 200%;
+            border-radius: 25px;
+            z-index: -1;
+            animation: gentleBorderGlow 6s ease infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes gentleBorderGlow {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
         }
     </style>
 </head>
@@ -716,44 +890,77 @@
         <div class="spinner"></div>
     </div>
     
-    <!-- 處理中提示訊息 -->
+    <!-- 處理中提示訊息 - 調整為中慢板速度，簡潔顏色 -->
     <div id="verificationOverlay" class="verification-overlay hidden">
         <div class="verification-container">
             <div class="verification-title">正在處理您的預約</div>
-            <div class="verification-message">請稍候，系統正在處理您的預約資料...</div>
+            <div class="verification-message">請稍候，系統正在為您安排最棒的課程體驗...</div>
             
-            <!-- 可愛的動畫場景 -->
+            <!-- 簡潔溫和的動畫場景 -->
             <div class="character-container">
-                <!-- 雲朵背景 -->
+                <!-- 簡潔的浮動粒子 -->
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                
+                <!-- 溫和的雲朵 -->
                 <div class="cloud cloud-1"></div>
                 <div class="cloud cloud-2"></div>
                 <div class="cloud cloud-3"></div>
                 
-                <!-- 星星 -->
-                <svg class="star star-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                <!-- 簡潔的星星 -->
+                <svg class="star star-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
-                <svg class="star star-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                <svg class="star star-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
-                <svg class="star star-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFD700">
+                <svg class="star star-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star star-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
                 
-                <!-- 可愛的小動物 -->
+                <!-- 溫和的可愛角色 -->
                 <svg class="character" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <circle cx="256" cy="256" r="200" fill="#FFE8CC"/>
-                    <circle cx="180" cy="180" r="40" fill="white"/>
-                    <circle cx="330" cy="180" r="40" fill="white"/>
-                    <circle cx="180" cy="180" r="20" fill="#333"/>
-                    <circle cx="330" cy="180" r="20" fill="#333"/>
-                    <ellipse cx="256" cy="280" rx="30" ry="20" fill="#FF9AA2"/>
-                    <path d="M150 120 L180 80 L210 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
-                    <path d="M300 120 L330 80 L360 120" fill="none" stroke="#FFD8A8" stroke-width="10" stroke-linecap="round"/>
+                    <!-- 身體 -->
+                    <ellipse cx="256" cy="300" rx="120" ry="140" fill="#F3F4F6"/>
+                    <!-- 頭部 -->
+                    <circle cx="256" cy="180" r="100" fill="#F3F4F6"/>
+                    <!-- 耳朵 -->
+                    <ellipse cx="200" cy="120" rx="25" ry="40" fill="#E5E7EB" transform="rotate(-30 200 120)"/>
+                    <ellipse cx="312" cy="120" rx="25" ry="40" fill="#E5E7EB" transform="rotate(30 312 120)"/>
+                    <!-- 內耳 -->
+                    <ellipse cx="200" cy="120" rx="12" ry="20" fill="#D1D5DB" transform="rotate(-30 200 120)"/>
+                    <ellipse cx="312" cy="120" rx="12" ry="20" fill="#D1D5DB" transform="rotate(30 312 120)"/>
+                    <!-- 眼睛 -->
+                    <circle cx="220" cy="160" r="20" fill="white"/>
+                    <circle cx="292" cy="160" r="20" fill="white"/>
+                    <circle cx="220" cy="160" r="12" fill="#6B7280"/>
+                    <circle cx="292" cy="160" r="12" fill="#6B7280"/>
+                    <!-- 眼睛高光 -->
+                    <circle cx="225" cy="155" r="4" fill="white"/>
+                    <circle cx="297" cy="155" r="4" fill="white"/>
+                    <!-- 鼻子 -->
+                    <ellipse cx="256" cy="190" rx="8" ry="6" fill="#E4A9AF"/>
+                    <!-- 嘴巴 -->
+                    <path d="M240 210 Q256 225 272 210" fill="none" stroke="#E4A9AF" stroke-width="3" stroke-linecap="round"/>
+                    <!-- 腮紅 -->
+                    <circle cx="180" cy="180" r="15" fill="#E4A9AF" opacity="0.3"/>
+                    <circle cx="332" cy="180" r="15" fill="#E4A9AF" opacity="0.3"/>
+                    <!-- 手臂 -->
+                    <ellipse cx="150" cy="280" rx="30" ry="60" fill="#F3F4F6"/>
+                    <ellipse cx="362" cy="280" rx="30" ry="60" fill="#F3F4F6"/>
+                    <!-- 腳 -->
+                    <ellipse cx="220" cy="420" rx="35" ry="25" fill="#E5E7EB"/>
+                    <ellipse cx="292" cy="420" rx="35" ry="25" fill="#E5E7EB"/>
                 </svg>
             </div>
             
-            <!-- 彩虹進度條 -->
+            <!-- 簡潔的進度條 -->
             <div class="rainbow-progress"></div>
         </div>
     </div>
@@ -1309,7 +1516,7 @@
         }
         
         // 顯示處理中訊息
-        function showVerificationMessage(message = "請稍候，系統正在處理您的預約資料...") {
+        function showVerificationMessage(message = "請稍候，系統正在為您安排最棒的課程體驗...") {
             const verificationMessage = document.querySelector('.verification-message');
             verificationMessage.textContent = message;
             document.getElementById('verificationOverlay').classList.remove('hidden');
@@ -1948,7 +2155,7 @@
             debugLog('提交預約資料', formData);
             
             try {
-                showVerificationMessage("請稍候，系統正在處理您的預約資料...");
+                showVerificationMessage("請稍候，系統正在為您安排最棒的課程體驗...");
                 
                 const response = await fetch(scriptURL, { 
                     method: 'POST', 
@@ -2046,7 +2253,7 @@
                         userEmail: formData.get('userEmail')
                     };
                     
-                    showVerificationMessage("請稍候，系統正在處理您的預約資料...");
+                    showVerificationMessage("請稍候，系統正在為您安排最棒的課程體驗...");
                     
                     const result = await submitReservation(formData);
                     
